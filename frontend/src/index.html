@@ -9,6 +9,31 @@
   <link rel="icon" type="image/x-icon" href="ours.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    /* Masquer la barre de défilement pendant le chargement initial */
+    body {
+      overflow: hidden;
+    }
+
+    /* Styles pour l'écran de chargement */
+    .initial-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #023436;
+      color: #2dd096;
+      z-index: 9999;
+      font-family: 'Geologica', sans-serif;
+      opacity: 1;
+      transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+  </style>
 </head>
 
 <body>

@@ -5,6 +5,8 @@ import * as THREE from 'three';
 import { SearchbarComponent } from './comp/searchbar/searchbar.component';
 import { NavbarComponent } from './comp/navbar/navbar.component';
 import { CommonModule } from '@angular/common';
+import { NotificationService } from '../../../services/notification/notification.service';
+import { Router } from '@angular/router';
 
 /**
  * @class HomeComponent
@@ -33,6 +35,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   isProjectInfoOpen: boolean = false;
   private vantaEffect: any;
   private vantaContainer: HTMLElement | null = null;
+
+  constructor(
+    private notificationService: NotificationService,
+    private router: Router
+  ) { }
 
   ngAfterViewInit(): void {
     // Attendre que le DOM soit complètement chargé et rendu
@@ -151,91 +158,180 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
    */
   toggleProjectInfo(): void {
     this.isProjectInfoOpen = !this.isProjectInfoOpen;
-
-    // Si le panel est ouvert, ajouter une classe au body pour empêcher le défilement
+    // Empêcher le défilement du body quand le panneau est ouvert
     if (this.isProjectInfoOpen) {
-      // Ne pas bloquer le défilement de la page principale
-      // document.body.style.overflow = 'hidden';
-
-      // Animation améliorée pour les cartes avec un délai progressif
-      setTimeout(() => {
-        const cards = document.querySelectorAll('.info-card');
-        const intro = document.querySelector('.info-intro');
-        const footer = document.querySelector('.info-footer');
-
-        // Animation de l'intro
-        if (intro) {
-          const introElement = intro as HTMLElement;
-          introElement.style.opacity = '0';
-          introElement.style.transform = 'translateY(-20px)';
-          setTimeout(() => {
-            introElement.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            introElement.style.opacity = '1';
-            introElement.style.transform = 'translateY(0)';
-          }, 200);
-        }
-
-        // Animation des cartes avec un effet cascade
-        cards.forEach((card, index) => {
-          const cardElement = card as HTMLElement;
-          cardElement.style.opacity = '0';
-          cardElement.style.transform = 'translateY(40px)';
-          setTimeout(() => {
-            cardElement.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            cardElement.style.opacity = '1';
-            cardElement.style.transform = 'translateY(0)';
-          }, 300 + (index * 150));
-        });
-
-        // Animation du footer
-        if (footer) {
-          const footerElement = footer as HTMLElement;
-          footerElement.style.opacity = '0';
-          footerElement.style.transform = 'translateY(20px)';
-          setTimeout(() => {
-            footerElement.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            footerElement.style.opacity = '1';
-            footerElement.style.transform = 'translateY(0)';
-          }, 300 + (cards.length * 150) + 100);
-        }
-      }, 300);
+      document.body.style.overflow = 'hidden';
     } else {
-      // Animation de fermeture
-      const panel = document.querySelector('.info-panel');
-      if (panel) {
-        const panelElement = panel as HTMLElement;
-        panelElement.style.transition = 'all 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
-
-        // Sur mobile, faire glisser vers le bas
-        if (window.innerWidth <= 480) {
-          panelElement.style.transform = 'translateY(100%)';
-        } else {
-          panelElement.style.opacity = '0';
-          panelElement.style.transform = 'translate(-50%, -50%) scale(0.9)';
-        }
-
-        // Restaurer le défilement après la fin de l'animation
-        setTimeout(() => {
-          // S'assurer que le défilement est toujours activé
-          document.body.style.overflow = '';
-
-          // Réinitialiser les styles pour permettre une réouverture correcte
-          panelElement.style.transition = '';
-          if (window.innerWidth <= 480) {
-            // Ne pas réinitialiser immédiatement pour éviter un flash visuel
-            setTimeout(() => {
-              panelElement.style.transform = '';
-            }, 50);
-          } else {
-            panelElement.style.opacity = '';
-            panelElement.style.transform = '';
-          }
-        }, 400);
-      } else {
-        // S'assurer que le défilement est toujours activé
-        document.body.style.overflow = '';
-      }
+      document.body.style.overflow = 'auto';
     }
+  }
+
+  scrollToInfoSection() {
+    const infoSection = document.querySelector('.info-section');
+    if (infoSection) {
+      infoSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  /**
+   * @brief Vérifie si l'utilisateur est connecté et agit en conséquence
+   * 
+   * @details
+   * Si l'utilisateur est connecté, redirige vers la page d'ajout de produit
+   * Sinon, affiche une notification pour inviter à se connecter
+   */
+  handleActionButtonClick() {
+    // Vérifier si l'utilisateur est connecté (exemple avec localStorage)
+    const isLoggedIn = localStorage.getItem('user') !== null;
+
+    if (isLoggedIn) {
+      // Rediriger vers la page d'ajout de produit
+      this.router.navigate(['/add-product']);
+    } else {
+      // Afficher une notification
+      this.notificationService.showWarning('Veuillez vous connecter pour contribuer à notre communauté');
+
+      // Forcer le défilement vers le haut avec plusieurs méthodes
+      this.forceScrollToTop();
+
+      // Attendre que le défilement soit terminé avant d'animer le bouton de connexion
+      // Délai plus long pour s'assurer que le défilement est terminé
+      setTimeout(() => {
+        // Animer le bouton de connexion
+        this.animateLoginButton();
+      }, 600);
+    }
+  }
+
+  /**
+   * @brief Force le défilement vers le haut de la page en utilisant plusieurs méthodes
+   * pour garantir la compatibilité avec tous les navigateurs
+   */
+  private forceScrollToTop(): void {
+    // Méthode 1: scrollTo standard avec comportement fluide
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+    // Méthode 2: scrollTo standard (pour les navigateurs qui ne supportent pas behavior)
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
+
+    // Méthode 3: scroll
+    setTimeout(() => {
+      window.scroll(0, 0);
+    }, 100);
+
+    // Méthode 4: scrollIntoView sur le premier élément
+    const firstElement = document.querySelector('.main-section');
+    if (firstElement) {
+      setTimeout(() => {
+        firstElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+
+    // Méthode 5: définir directement scrollTop sur body et documentElement
+    setTimeout(() => {
+      document.body.scrollTop = 0; // Pour Safari
+      document.documentElement.scrollTop = 0; // Pour Chrome, Firefox, IE et Opera
+    }, 200);
+  }
+
+  /**
+   * @brief Anime le bouton de connexion pour attirer l'attention
+   */
+  private animateLoginButton() {
+    // Attendre un peu pour s'assurer que le DOM est prêt après le défilement
+    setTimeout(() => {
+      const loginButton = document.querySelector('.login-button') as HTMLElement;
+
+      if (loginButton) {
+        // S'assurer que le bouton est visible
+        loginButton.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+        // Attendre que le défilement soit terminé avant d'ajouter les effets visuels
+        setTimeout(() => {
+          // Ajouter une classe pour l'animation
+          loginButton.classList.add('login-button-highlight');
+
+          // Créer un effet de focus visuel
+          const rect = loginButton.getBoundingClientRect();
+          const spotlight = document.createElement('div');
+          spotlight.className = 'login-spotlight';
+
+          // Positionner le spotlight
+          spotlight.style.position = 'fixed';
+          spotlight.style.top = rect.top + 'px';
+          spotlight.style.left = rect.left + 'px';
+          spotlight.style.width = rect.width + 'px';
+          spotlight.style.height = rect.height + 'px';
+          spotlight.style.pointerEvents = 'none';
+
+          // Ajouter une bordure brillante
+          spotlight.style.border = '3px solid #2dd096';
+
+          // Ajouter au DOM
+          document.body.appendChild(spotlight);
+
+          // Ajouter une flèche pointant vers le bouton
+          const arrow = document.createElement('div');
+          arrow.className = 'login-arrow';
+          arrow.innerHTML = '⬆';
+          arrow.style.position = 'fixed';
+          arrow.style.top = (rect.bottom + 20) + 'px';
+          arrow.style.left = (rect.left + rect.width / 2 - 10) + 'px';
+          arrow.style.color = '#2dd096';
+          arrow.style.fontSize = '35px';
+          arrow.style.fontWeight = 'bold';
+          arrow.style.animation = 'bounce 1s infinite';
+          arrow.style.zIndex = '1001';
+          document.body.appendChild(arrow);
+
+          // Ajouter un texte "Connectez-vous ici" sous la flèche
+          const loginText = document.createElement('div');
+          loginText.innerHTML = 'Connectez-vous ici';
+          loginText.style.position = 'fixed';
+          loginText.style.top = (rect.bottom + 60) + 'px';
+          loginText.style.left = (rect.left + rect.width / 2 - 60) + 'px';
+          loginText.style.color = '#2dd096';
+          loginText.style.fontWeight = 'bold';
+          loginText.style.fontSize = '14px';
+          loginText.style.zIndex = '1001';
+          loginText.style.textShadow = '0 0 5px rgba(0, 0, 0, 0.7)';
+          document.body.appendChild(loginText);
+
+          // Ajouter un événement de clic sur le spotlight pour rediriger vers le bouton de connexion
+          spotlight.style.pointerEvents = 'auto';
+          spotlight.style.cursor = 'pointer';
+          spotlight.addEventListener('click', () => {
+            loginButton.click();
+          });
+
+          // Retirer la classe et les éléments après l'animation
+          setTimeout(() => {
+            loginButton.classList.remove('login-button-highlight');
+            if (spotlight.parentNode) {
+              document.body.removeChild(spotlight);
+            }
+            if (arrow.parentNode) {
+              document.body.removeChild(arrow);
+            }
+            if (loginText.parentNode) {
+              document.body.removeChild(loginText);
+            }
+          }, 4000); // Augmenter la durée à 4 secondes pour donner plus de temps à l'utilisateur
+        }, 300); // Attendre 300ms après le défilement pour ajouter les effets
+      }
+    }, 100); // Attendre 100ms pour s'assurer que le DOM est prêt
   }
 
   /**
@@ -247,51 +343,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
    * Ajoute une animation de fermeture fluide.
    */
   startExploring(): void {
-    // Animation de fermeture
-    const panel = document.querySelector('.info-panel');
-    if (panel) {
-      const panelElement = panel as HTMLElement;
-      panelElement.style.transition = 'all 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
-
-      // Sur mobile, faire glisser vers le bas
-      if (window.innerWidth <= 480) {
-        panelElement.style.transform = 'translateY(100%)';
-      } else {
-        panelElement.style.opacity = '0';
-        panelElement.style.transform = 'translate(-50%, -50%) scale(0.9)';
-      }
-
-      // Mettre à jour l'état et restaurer le défilement après la fin de l'animation
-      setTimeout(() => {
-        this.isProjectInfoOpen = false;
-
-        // S'assurer que le défilement est toujours activé
-        document.body.style.overflow = '';
-
-        // Réinitialiser les styles pour permettre une réouverture correcte
-        panelElement.style.transition = '';
-        if (window.innerWidth <= 480) {
-          // Ne pas réinitialiser immédiatement pour éviter un flash visuel
-          setTimeout(() => {
-            panelElement.style.transform = '';
-          }, 50);
-        } else {
-          panelElement.style.opacity = '';
-          panelElement.style.transform = '';
-        }
-
-        // Optionnel : faire défiler jusqu'à la section de recherche
-        const searchSection = document.querySelector('.search-container');
-        if (searchSection) {
-          searchSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 400);
-    } else {
-      this.isProjectInfoOpen = false;
-
-      // S'assurer que le défilement est toujours activé
-      document.body.style.overflow = '';
-    }
+    this.toggleProjectInfo();
+    // Autres actions si nécessaire
   }
 
   /**

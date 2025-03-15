@@ -1,17 +1,16 @@
-
 <nav class="navbar">
   <div class="logo" routerLink="/home">
-      <img class="easelogo" src="vrailogo.png" alt="Logo">
+    <img class="easelogo" src="vrailogo.png" alt="Logo">
   </div>
 
   <ul [class.active]="menuOpen">
-    
-    <li >
+
+    <li>
       <a class="nav-btn" routerLink="/home">
         <i class="fa-solid fa-house"></i>Accueil
       </a>
     </li>
-    <li >
+    <li>
       <a class="nav-btn" routerLink="/category">
         <i class="fa-solid fa-tags"></i>Catégories
       </a>
@@ -21,7 +20,7 @@
         <i class="fa-solid fa-plus"></i>Add Product
       </a>
     </li>
-    <li >
+    <li>
       <a class="nav-btn" routerLink="/contact">
         <i class="fa-solid fa-phone"></i>Contact
       </a>
@@ -35,7 +34,7 @@
           <div *ngIf="showDropdown || isMobile" class="dropdown-menu">
             <span routerLink="/user-profile" class="user-btn profile-btn"><i class="fa-solid fa-user"></i>Profile</span>
             <span *ngIf="userRole === 'Admin' || userRole === 'SuperAdmin'" routerLink="/admin"
-              class="user-btn admin-btn"><i class="fas fa-user-shield"></i>Dashboard Admin</span>            
+              class="user-btn admin-btn"><i class="fas fa-user-shield"></i>Dashboard Admin</span>
             <div class="logout-container">
               <span (click)="logout()" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i>Log out</span>
             </div>
@@ -43,7 +42,7 @@
         </ng-container>
 
         <ng-template #loginTemplate>
-          <a class="nav-btn" routerLink="/login" class="nav-btn login-btn">Login</a>
+          <a class="nav-btn login-button" routerLink="/login">Login</a>
         </ng-template>
       </div>
     </li>

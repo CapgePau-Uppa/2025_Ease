@@ -7,8 +7,6 @@
 
 /* Style pour le body */
 body {
-  overflow-y: auto;
-  /* Utiliser auto au lieu de scroll pour n'afficher la barre que si nécessaire */
   background-color: #023436;
   margin: 0;
   padding: 0;
@@ -27,15 +25,10 @@ body {
 .container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 100%;
-  min-height: 100vh;
-  padding: 10px;
-  gap: 20px;
   background-color: #023436;
   position: relative;
   overflow-x: hidden;
-  overflow-y: auto;
   /* Optimisations pour la fluidité */
   will-change: transform;
   /* Indique au navigateur que cet élément va changer, optimisant le rendu */
@@ -44,6 +37,102 @@ body {
   backface-visibility: hidden;
   transform: translateZ(0);
   /* Force l'accélération matérielle */
+}
+
+/* Section principale (100vh) */
+.main-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 10px;
+  gap: 20px;
+  position: relative;
+}
+
+/* Section d'information (en dessous de la zone principale) */
+.info-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 60px 20px;
+  background: linear-gradient(to bottom, #023436, #004d40);
+}
+
+.section-title {
+  color: #ffffff;
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #2dd096;
+  border-radius: 2px;
+}
+
+/* Indicateur de défilement */
+.scroll-indicator {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ffffff;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.scroll-indicator i {
+  font-size: 1.5rem;
+}
+
+.bounce {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-10px);
+  }
+
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.scroll-indicator:hover {
+  opacity: 1;
+  cursor: pointer;
 }
 
 /* Assurer que tous les éléments de l'interface sont au-dessus de l'animation */
@@ -156,8 +245,7 @@ h5 {
   cursor: pointer;
   transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  /* Valeur la plus basse pour le bouton */
+  z-index: 100;
 }
 
 /* Animation rotation au survol */
@@ -166,39 +254,32 @@ h5 {
   transform: rotate(180deg);
 }
 
-/* Menu des paramètres qui s'affiche sous l'engrenage */
+/* Menu des paramètres qui s'affiche au-dessus de l'engrenage */
 .settings-menu {
   position: fixed;
-  bottom: 75px;
-  /* 🔥 Placé SOUS l'engrenage */
-  right: 23px;
-  width: 50px;
+  bottom: 85px;
+  right: 20px;
+  width: 55px;
   height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: 30px;
-  border-radius: 20px 20px 0 0;
-  /* 🔥 Coins arrondis en bas */
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   opacity: 0;
-  transform: translateY(-20px) scale(0);
+  transform: translateY(20px);
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
   flex-direction: column;
   gap: 10px;
   pointer-events: none;
-  z-index: 49;
-  /* Juste en-dessous du bouton */
-  /* Sous l'engrenage */
-  transform: translateY(50px);
-
+  z-index: 99;
 }
 
 /* Apparition fluide du menu */
 .settings-menu.open {
   opacity: 1;
-  transform: translateY(20px);
+  transform: translateY(0);
   pointer-events: all;
 }
 
@@ -250,50 +331,11 @@ h5 {
   transition: background 0.5s ease-in-out;
 }
 
-/* Style général de la scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-  /* Légèrement plus large pour être plus visible */
-  height: 10px;
-  /* Hauteur pour le scroll horizontal */
-}
-
-/* Style du "thumb" (la partie défilable) */
-::-webkit-scrollbar-thumb {
-  background: rgba(45, 208, 150, 0.4);
-  /* Couleur verte légère, assortie au thème */
-  border-radius: 5px;
-  /* Arrondi modéré */
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  /* Bordure légère pour mieux voir la scrollbar */
-}
-
-/* Changement de couleur au survol */
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 208, 150, 0.6);
-  /* Plus visible au survol */
-}
-
-/* Couleur de fond de la scrollbar */
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  /* Fond légèrement visible */
-  border-radius: 5px;
-}
-
-/* Style spécifique pour Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(45, 208, 150, 0.4) rgba(0, 0, 0, 0.05);
-}
-
 /* Amélioration de la fluidité du défilement */
 html,
 body {
   scroll-behavior: smooth;
   /* Défilement fluide */
-  -webkit-overflow-scrolling: touch;
-  /* Défilement fluide sur iOS */
 }
 
 /* Styles pour la section d'explications du projet */
@@ -822,59 +864,526 @@ body {
 
 /* Style pour le bouton d'information */
 .info-button {
-  background: linear-gradient(135deg, rgba(45, 208, 150, 0.8), rgba(0, 77, 64, 0.8));
+  display: none;
+  /* Cacher le bouton au lieu de le supprimer complètement pour éviter les erreurs */
+}
+
+/* Styles pour les cartes interactives */
+.info-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  perspective: 1000px;
+  /* Perspective pour l'effet 3D */
+}
+
+.info-card-flip {
+  width: 320px;
+  height: 220px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.5s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.info-card-flip:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.info-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
+}
+
+.info-card-flip:hover .info-card-inner {
+  transform: rotateY(180deg);
+}
+
+.info-card-front,
+.info-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  /* Safari */
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+  border-radius: 15px;
+}
+
+.info-card-front {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.9));
+  color: #023436;
+  border: 1px solid rgba(45, 208, 150, 0.2);
+}
+
+.info-card-back {
+  background: linear-gradient(135deg, #2dd096, #00796b);
+  color: white;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.info-card-front .card-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.info-card-front .card-icon i {
+  font-size: 28px;
+  color: #004d40;
+}
+
+.info-card-front h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #023436;
+}
+
+.info-card-front p {
+  margin: 0;
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.info-card-back p {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.info-card-back i {
+  font-size: 28px;
+  animation: arrowPulse 1.5s infinite;
+}
+
+/* Animation au scroll */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Appliquer l'animation aux cartes */
+.info-card-flip {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.info-card-flip:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.info-card-flip:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.info-card-flip:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+/* Styles responsifs pour les cartes */
+@media (max-width: 768px) {
+  .info-cards-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .info-card-flip {
+    width: 90%;
+    max-width: 350px;
+  }
+}
+
+/* Styles pour les nouvelles cartes informatives */
+.info-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 50px;
+}
+
+.info-card-static {
+  width: 320px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(45, 208, 150, 0.1);
+}
+
+.info-card-static::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #2dd096, #00796b);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.info-card-static:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.info-card-static:hover::before {
+  transform: scaleX(1);
+}
+
+.info-card-static .card-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.info-card-static:hover .card-icon {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.info-card-static .card-icon i {
+  font-size: 28px;
+  color: #004d40;
+  transition: all 0.3s ease;
+}
+
+.info-card-static:hover .card-icon i {
+  color: #2dd096;
+}
+
+.info-card-static h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #023436;
+  position: relative;
+}
+
+.info-card-static p {
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.tag {
+  background: rgba(45, 208, 150, 0.1);
+  color: #00796b;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.info-card-static:hover .tag {
+  background: rgba(45, 208, 150, 0.2);
+}
+
+/* Section supplémentaire */
+.additional-info {
+  width: 100%;
+  max-width: 800px;
+  margin: 30px auto 0;
+  text-align: center;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.additional-info h3 {
+  color: #ffffff;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.additional-info p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #2dd096, #00796b);
   color: white;
   border: none;
   border-radius: 30px;
-  padding: 12px 24px;
-  font-size: 1rem;
+  padding: 14px 30px;
+  font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  letter-spacing: 0.5px;
-  margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(45, 208, 150, 0.3);
 }
 
-.info-button:hover {
+.action-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px rgba(45, 208, 150, 0.4);
+  background: linear-gradient(135deg, #33e0a1, #00897b);
 }
 
-.info-button:active {
+.action-btn:active {
   transform: translateY(-1px);
 }
 
-.info-button i {
-  font-size: 1.2rem;
-  color: #ffffff;
+/* Animation au scroll */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Pour les très petits écrans */
-@media (max-width: 360px) {
-  .info-header h2 {
-    font-size: 1.3rem;
+/* Appliquer l'animation aux cartes */
+.info-card-static {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.info-card-static:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.info-card-static:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.info-card-static:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.additional-info {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+  animation-delay: 0.8s;
+}
+
+/* Styles responsifs pour les cartes */
+@media (max-width: 768px) {
+  .info-cards-container {
+    flex-direction: column;
+    align-items: center;
   }
 
-  .info-intro p {
-    font-size: 0.9rem;
+  .info-card-static {
+    width: 90%;
+    max-width: 350px;
   }
 
-  .card-content h3 {
-    font-size: 1.1rem;
+  .additional-info {
+    width: 90%;
+    padding: 20px;
   }
 
-  .card-content p {
-    font-size: 0.9rem;
+  .additional-info h3 {
+    font-size: 1.5rem;
   }
 
-  .info-content {
-    padding: 15px;
-    gap: 15px;
+  .additional-info p {
+    font-size: 1rem;
   }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Animation pour le bouton de connexion */
+@keyframes pulse-highlight {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(45, 208, 150, 0.9);
+    filter: brightness(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px 5px rgba(45, 208, 150, 0.7);
+    filter: brightness(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(45, 208, 150, 0.9);
+    filter: brightness(1);
+  }
+}
+
+.login-button-highlight {
+  animation: pulse-highlight 0.6s cubic-bezier(0.66, 0, 0.33, 1) infinite;
+  background-color: #2dd096 !important;
+  color: white !important;
+  border-color: #2dd096 !important;
+  z-index: 1000 !important;
+  position: relative !important;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7) !important;
+  font-weight: bold !important;
+}
+
+/* Effet de spotlight */
+.login-spotlight {
+  border-radius: 4px;
+  box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.85);
+  z-index: 999;
+  animation: spotlight-pulse 1.5s ease-in-out infinite;
+  position: fixed;
+  pointer-events: none;
+  border: 3px solid #2dd096;
+}
+
+@keyframes spotlight-pulse {
+  0% {
+    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.85);
+    transform: scale(1);
+    border-color: rgba(45, 208, 150, 0.7);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.9), 0 0 40px 10px rgba(45, 208, 150, 0.9);
+    transform: scale(1.08);
+    border-color: rgba(45, 208, 150, 1);
+  }
+
+  100% {
+    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.85);
+    transform: scale(1);
+    border-color: rgba(45, 208, 150, 0.7);
+  }
+}
+
+/* Animation pour la flèche pointant vers le bouton de connexion */
+@keyframes bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-15px);
+  }
+
+  60% {
+    transform: translateY(-7px);
+  }
+}
+
+.login-arrow {
+  animation: bounce 1s infinite;
+  text-shadow: 0 0 10px rgba(45, 208, 150, 0.8);
+}
+
+/* Animation pour le bouton d'action */
+.action-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(100, 100);
+    opacity: 0;
+  }
+}
+
+.action-btn:active::after {
+  animation: ripple 0.6s ease-out;
 }

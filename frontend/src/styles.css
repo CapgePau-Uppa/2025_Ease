@@ -1,6 +1,37 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Restaurer la barre de défilement par défaut après le chargement */
+body.loaded {
+    overflow: auto;
+}
+
+/* Style de la barre de défilement - style cohérent avec l'application */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2dd096;
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #23a77a;
+}
+
+/* Pour Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #2dd096 #f1f1f1;
+}
+
 *,
 ::before,
 ::after {
@@ -138,6 +169,9 @@ input:-webkit-autofill:active {
     font-family: 'Geologica', sans-serif;
     opacity: 1;
     transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    overflow-y: auto !important;
+    /* Utiliser la barre de défilement par défaut */
+    overflow-x: hidden;
 }
 
 .initial-loading-container {
