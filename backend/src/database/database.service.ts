@@ -625,9 +625,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     if (!queryWithJoin) return [];
 
     // Retrieve FK_Brand before building parameters
-    let brandFK : string;
+    let brandFK: string;
     if (filters.brand) {
-       brandFK = selectedProduct?.FK_Brands ?? await this.checkBrand(filters.brand);
+      brandFK = selectedProduct?.FK_Brands ?? await this.checkBrand(filters.brand);
     }
 
     // Step 5: Prepare parameters for query execution

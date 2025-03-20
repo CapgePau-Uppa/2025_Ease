@@ -1,32 +1,76 @@
-﻿services:
+﻿version: '3.8'
+
+services:
+  # Couchbase Server
+  couchbase:
+    image: couchbase:7.1.1
+    ports:
+      - "${DB_PORT:-8091}:8091"     # Interface Web
+      - "8092:8092"                 # API
+      - "8093:8093"                 # Query Service
+      - "8094:8094"                 # Search Service
+      - "8095:8095"                 # Analytics
+      - "8096:8096"                 # Eventing Service
+      - "11210:11210"               # Data Service
+      - "11211:11211"               # Memcached port
+    volumes:
+      - couchbase_data:/opt/couchbase/var
+    environment:
+      - COUCHBASE_ADMINISTRATOR_USERNAME=${DB_USER:-user1}
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=${DB_PASSWORD:-password}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/ui/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # Backend NestJS
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.backend
     ports:
-      - "${BACKEND_PORT}:3000"
+      - "${BACKEND_PORT:-3000}:3000"
     environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - BACKEND_PORT=3000
       - BASE_PATH=/app
-      - DB_HOST=couchbase
-      - DB_PORT=${DB_PORT}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_BUCKET=${BUCKET_NAME}
+      - DB_HOST=couchbase://couchbase
+      - DB_PORT=${DB_PORT:-8091}
+      - DB_USER=${DB_USER:-user1}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - BUCKET_NAME=${BUCKET_NAME:-ProductsBDD}
+      - USER_BUCKET_NAME=${USER_BUCKET_NAME:-UsersBDD}
+      - CATEGORY_BUCKET_NAME=${CATEGORY_BUCKET_NAME:-CategoryBDD}
+      - BRAND_BUCKET_NAME=${BRAND_BUCKET_NAME:-BrandsBDD}
+      - INDEX_NAME=${INDEX_NAME:-ProductsBDD._default.IndexTest}
+      - JWT_SECRET=${JWT_SECRET:-a3f1b2c5d6e8f9g1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7}
+      - UNSPLASH_ACCESS_KEY=${UNSPLASH_ACCESS_KEY:-nuVp2_81YPnvvJ3g87X9AtIUhURRh-WVaxeR1p40OwY}
+      - URL_FRONTEND=http://frontend
+      - URL_BACKEND=http://backend:3000/data
+      - DISABLE_SSL=true
+    depends_on:
+      couchbase:
+        condition: service_healthy
     volumes:
-      - ./backend:/app
-      - /app/node_modules
-    networks:
-      - app-network
+      - ./logs:/app/logs
+    restart: unless-stopped
 
+  # Frontend Angular
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
     ports:
-      - "${FRONTEND_PORT}:80"
-    networks:
-      - app-network
+      - "${FRONTEND_PORT:-4200}:80"
+    environment:
+      - URL_FRONTEND=http://localhost:${FRONTEND_PORT:-4200}
+      - URL_BACKEND=http://localhost:${BACKEND_PORT:-3000}/data
+    depends_on:
+      - backend
+    restart: unless-stopped
 
-networks:
-  app-network:
-    driver: bridge
+volumes:
+  couchbase_data:
+    driver: local
