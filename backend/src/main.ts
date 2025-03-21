@@ -106,45 +106,19 @@ async function bootstrap() {
   /**
    * Configures CORS settings with credential support.
    */
-  // Configuration CORS basée strictement sur NODE_ENV
-  const nodeEnv = process.env.NODE_ENV || 'development';
-  console.log(`🌍 Environnement détecté: ${nodeEnv}`);
-
-  let corsOrigin;
-  let corsCredentials = true;
-
-  switch (nodeEnv) {
-    case 'development':
-      // Environnement de développement local
-      corsOrigin = process.env.URL_FRONTEND || 'http://localhost:4200';
-      console.log(`🛠️ CORS en développement: ${corsOrigin}`);
-      break;
-
-    case 'production':
-      // Environnement de production locale (Docker, etc.)
-      corsOrigin = process.env.URL_FRONTEND || 'http://localhost:4200';
-      console.log(`🏭 CORS en production locale: ${corsOrigin}`);
-      break;
-
-    case 'deploy':
-      // Environnement de déploiement (Render, Vercel, etc.)
-      corsOrigin = process.env.URL_FRONTEND || true;
-      console.log(`🚀 CORS en déploiement: ${corsOrigin}`);
-      break;
-
-    default:
-      // Fallback sécurisé
-      corsOrigin = process.env.URL_FRONTEND || true;
-      console.log('⚠️ Mode CORS par défaut activé');
-  }
+  // Configuration CORS temporairement permissive pour diagnostic
+  console.log('🌍 Configuration CORS permissive pour diagnostic');
 
   app.enableCors({
-    origin: corsOrigin,
+    origin: true, // Accepte toutes les origines
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-    credentials: corsCredentials,
-    allowedHeaders: "Content-Type, Accept, Authorization",
-    exposedHeaders: "Set-Cookie"
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Accept", "Authorization", "X-Requested-With", "Origin"],
+    exposedHeaders: ["Set-Cookie"],
+    maxAge: 3600
   });
+
+  console.log('✅ CORS configuré en mode permissif');
 
   /**
    * Starts the NestJS server on the configured port.

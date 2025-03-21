@@ -92,11 +92,34 @@ export class UsersService {
    */
   async findAll(): Promise<any[]> {
     try {
-      const users = await this.databaseService.getFilteredUsers();
-      return users;
+      console.log("🔍 UsersService - Début de récupération des utilisateurs filtrés");
+
+      // Tenter d'utiliser la méthode principale pour récupérer les utilisateurs
+      try {
+        const users = await this.databaseService.getFilteredUsers();
+        console.log(`✅ UsersService - ${users.length} utilisateurs récupérés avec succès`);
+        return users;
+      } catch (primaryError) {
+        // Journaliser l'erreur principale
+        console.error("❌ UsersService - Erreur lors de la récupération des utilisateurs filtrés:", primaryError);
+
+        // Méthode de secours: récupérer tous les utilisateurs et effectuer le filtrage manuellement
+        console.warn("⚠️ UsersService - Tentative avec méthode de secours...");
+        const allUsers = await this.databaseService.getAllUsers();
+
+        // Filtrage manuel des SuperAdmin
+        const filteredUsers = allUsers.filter(user => user.role !== 'SuperAdmin');
+        console.log(`✅ UsersService - Méthode de secours: ${filteredUsers.length} utilisateurs récupérés`);
+
+        return filteredUsers;
+      }
     } catch (error) {
-      console.error("❌ UsersService - Error retrieving filtered users:", error);
-      throw new InternalServerErrorException("Error retrieving users list.");
+      console.error("❌ UsersService - Erreur critique lors de la récupération des utilisateurs:", error);
+      console.error("❌ UsersService - Stack trace:", error.stack);
+
+      // En dernier recours, retourner un tableau vide avec un message d'erreur dans les logs
+      console.warn("⚠️ UsersService - Retour d'un tableau vide après échec des tentatives");
+      throw new InternalServerErrorException(`Erreur lors de la récupération de la liste des utilisateurs: ${error.message}`);
     }
   }
 

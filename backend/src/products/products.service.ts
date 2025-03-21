@@ -274,9 +274,9 @@ export class ProductsService {
       console.log("🌍 Searching via Open Food Facts with criteria:", criteria);
       let results: any;
       // if user's only looking for food
-      if ( criteria.category === 'Food' && !criteria.productSource && !criteria.tags) {
+      if (criteria.category === 'Food' && !criteria.productSource && !criteria.tags) {
         results = await this.openFoodFactsService.searchFoodProducts();
-      // else search for similar products
+        // else search for similar products
       } else {
         results = await this.openFoodFactsService.searchSimilarProducts({
           category: criteria.category,
@@ -357,6 +357,32 @@ export class ProductsService {
         throw error;
       }
       throw new InternalServerErrorException("Error inserting product.");
+    }
+  }
+
+  /**
+ * @brief Retrieves products by its location.
+ */
+  async getProductByLocation(location: string) {
+    try {
+      const products = (await this.databaseService.getProductByLocation(location)) ?? [];
+      const externalProducts = (await this.getOFFAroundMe(location)) ?? [];
+
+      const combinedResults = [...products, ...externalProducts];
+
+      if (combinedResults.length === 0) {
+        throw new NotFoundException(`⚠️ No products found around: "${location}".`);
+      }
+
+      return combinedResults;
+    } catch (error) {
+      // Propagate NotFoundException if it's already thrown
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      console.error("❌ Error retrieving products by location:", error);
+      throw new InternalServerErrorException("Error retrieving products by location.");
     }
   }
 }

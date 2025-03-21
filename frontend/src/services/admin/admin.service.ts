@@ -166,23 +166,23 @@ export class AdminService {
   }
 
 
-    // Récupère le rôle de l'utilisateur actuel
-    getCurrentUserRole(): Observable<string> {
-      console.log('🔄 Récupération du rôle utilisateur...');
-      return this.http.get<{ role: string }>(`${this.adminURL}/currentUserRole`, {
-        withCredentials: true
-      }).pipe(
-        map(response => {
-          console.log('✅ Rôle reçu:', response);
-          return response.role;
-        }),
-        retry(3),
-        catchError((error) => {
-          console.error('❌ Erreur lors de la récupération du rôle:', error);
-          return this.handleError(error);
-        })
-      );
-    }
+  // Récupère le rôle de l'utilisateur actuel
+  getCurrentUserRole(): Observable<string> {
+    console.log('🔄 Récupération du rôle utilisateur...');
+    return this.http.get<{ role: string }>(`${this.adminURL}/currentUserRole`, {
+      withCredentials: true
+    }).pipe(
+      map(response => {
+        console.log('✅ Rôle reçu:', response);
+        return response.role;
+      }),
+      retry(3),
+      catchError((error) => {
+        console.error('❌ Erreur lors de la récupération du rôle:', error);
+        return this.handleError(error);
+      })
+    );
+  }
 
   /**
    * @method getAllRoles

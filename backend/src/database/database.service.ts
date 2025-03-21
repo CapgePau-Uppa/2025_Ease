@@ -665,19 +665,28 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    * @throws {InternalServerErrorException} In case of error.
    */
   async getAllUsers(): Promise<any[]> {
-    const bucketName = this.usersBucket.name;
-    if (!bucketName) {
-      throw new Error("❌ USER_BUCKET_NAME is not defined in environment variables.");
+    try {
+      const bucketName = this.usersBucket.name;
+      if (!bucketName) {
+        throw new Error("❌ USER_BUCKET_NAME is not defined in environment variables.");
+      }
+
+      // Ajout de logs pour diagnostiquer les problèmes
+      console.log(`📊 Tentative de récupération des utilisateurs depuis le bucket: ${bucketName}`);
+      console.log(`📊 Configuration de connexion: Host=${process.env.DB_HOST}, User=${process.env.DB_USER}`);
+
+      const query = `
+        SELECT META(u).id as id, u.*
+        FROM \`${bucketName}\`._default._default u
+        WHERE u.email IS NOT MISSING
+        ORDER BY u.createdAt DESC
+      `;
+
+      return this.executeQuery(query);
+    } catch (error) {
+      console.error("❌ Erreur dans getAllUsers:", error);
+      throw new Error(`Échec de la récupération des utilisateurs: ${error.message}`);
     }
-
-    const query = `
-      SELECT META(u).id as id, u.*
-      FROM \`${bucketName}\`._default._default u
-      WHERE u.email IS NOT MISSING
-      ORDER BY u.createdAt DESC
-    `;
-
-    return this.executeQuery(query);
   }
 
   /**
@@ -809,21 +818,47 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    */
   async getFilteredUsers(): Promise<any[]> {
     try {
-      // Fetch all users
+      console.log(`🔍 Début de la récupération des utilisateurs filtrés...`);
+
+      // Vérifier l'état de la connexion Couchbase
+      if (!this.cluster) {
+        console.warn("⚠️ La connexion Couchbase n'est pas initialisée. Tentative de reconnexion...");
+        await this.initializeConnections();
+
+        // Vérifier à nouveau après tentative de reconnexion
+        if (!this.cluster) {
+          throw new Error("❌ Impossible d'établir la connexion à Couchbase après tentative de reconnexion");
+        }
+      }
+
+      // Vérifier l'état du bucket users
+      if (!this.usersBucket) {
+        throw new Error("❌ Le bucket 'users' n'est pas initialisé");
+      }
+
+      // Fetch all users with detailed logging
+      console.log(`📊 Récupération de tous les utilisateurs...`);
       const allUsers = await this.getAllUsers();
+      console.log(`📊 ${allUsers.length} utilisateurs récupérés avec succès`);
 
       // Filter superadmin and current users
-      return allUsers.filter(user => {
-        // Exculude superadmin
+      console.log(`📊 Filtrage des SuperAdmin...`);
+      const filteredUsers = allUsers.filter(user => {
+        // Exclude superadmin
         if (user.role === 'SuperAdmin') {
+          console.log(`📊 Utilisateur exclus - SuperAdmin: ${user.email}`);
           return false;
         }
 
         return true;
       });
+
+      console.log(`📊 ${filteredUsers.length} utilisateurs retournés après filtrage`);
+      return filteredUsers;
     } catch (error) {
-      console.error("❌ Error in getFilteredUsers:", error);
-      throw new Error("Failed to retrieve filtered users list");
+      console.error("❌ Erreur détaillée dans getFilteredUsers:", error);
+      console.error("❌ Stack trace:", error.stack);
+      throw new Error(`Échec de la récupération des utilisateurs filtrés: ${error.message}`);
     }
   }
 

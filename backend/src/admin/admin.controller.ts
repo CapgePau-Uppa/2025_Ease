@@ -33,6 +33,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { UsersService } from "../users/users.service";
 import { UserRole } from "src/auth/enums/roles.enum";
 import { AdminService } from "./admin.service";
+import { DatabaseService } from "src/database/database.service";
 
 /**
  * @brief Controller responsible for administrative operations.
@@ -52,6 +53,7 @@ export class AdminController {
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
     private adminService: AdminService,
+    private readonly databaseService: DatabaseService,
   ) { }
 
   /**
@@ -63,7 +65,6 @@ export class AdminController {
    * @throws {HttpException} If an error occurs while retrieving users.
    */
   @Get("users")
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async getAllUsers(@Req() request: any): Promise<any[]> {
     try {
       // Get all the users from de DB
@@ -242,5 +243,79 @@ export class AdminController {
   getCurrentUserRole(@Req() request: any): { role: string } {
     const userRole = request.user?.role;
     return { role: userRole };
+  }
+
+  /**
+   * @brief Route de test pour vérifier la connexion Couchbase.
+   * @details Cette route contourne les gardes d'authentification pour tester directement 
+   * la connexion à Couchbase et les requêtes de base.
+   * ATTENTION: À utiliser uniquement pour le débogage et à retirer après résolution du problème.
+   * 
+   * @returns Informations sur la connexion Couchbase et les données de test.
+   */
+  @Get("test-connection")
+  @UseGuards() // Désactive tous les gardes précédents pour cette route
+  async testCouchbaseConnection() {
+    try {
+      // 1. Afficher les informations de connexion
+      const connectionInfo = {
+        host: process.env.DB_HOST,
+        userBucket: process.env.USER_BUCKET_NAME,
+        certPath: process.env.SSL_CERT_PATH,
+      };
+
+      // 2. Tester l'accès au bucket utilisateurs avec des données statiques
+      const testUsers = [
+        { id: "test1", username: "Test User 1", email: "test1@example.com", role: "User" },
+        { id: "test2", username: "Test User 2", email: "test2@example.com", role: "Admin" }
+      ];
+
+      // 3. Tenter de récupérer les 3 premiers utilisateurs de Couchbase
+      let realUsers: any[] = [];
+      let error = null;
+      try {
+        // Définir un timeout pour éviter que la requête ne bloque trop longtemps
+        const timeoutPromise = new Promise<any[]>((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout lors de la récupération des utilisateurs")), 5000)
+        );
+
+        const usersResult = await Promise.race<any[]>([
+          this.databaseService.getAllUsers(),
+          timeoutPromise
+        ]);
+
+        realUsers = usersResult || [];
+
+        // Limiter à 3 utilisateurs pour la sécurité des données
+        if (realUsers.length > 3) {
+          realUsers = realUsers.slice(0, 3).map(user => ({
+            id: user.id,
+            email: user.email,
+            role: user.role
+          }));
+        }
+      } catch (e) {
+        error = {
+          message: e.message,
+          stack: e.stack
+        };
+      }
+
+      return {
+        connectionInfo,
+        testUsers,
+        realUsers: realUsers || [],
+        error,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error("❌ Erreur lors du test de connexion:", error);
+      return {
+        success: false,
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 }

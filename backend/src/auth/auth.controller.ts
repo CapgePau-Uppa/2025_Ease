@@ -71,52 +71,66 @@ export class AuthController {
     const result = await this.authService.login(body);
     console.log("✅ Login successful, setting cookie");
 
-    // Configuration des cookies basée strictement sur NODE_ENV
+    // Configuration des cookies selon l'environnement
     const nodeEnv = process.env.NODE_ENV || 'development';
     console.log(`🔧 Configuration des cookies pour l'environnement: ${nodeEnv}`);
 
-    // Configuration par défaut des options de cookie
-    let cookieOptions = {
+    // Configuration de base des cookies
+    const cookieOptions = {
       httpOnly: false,
       secure: false,
-      sameSite: 'lax' as 'lax' | 'strict' | 'none',
+      sameSite: 'lax' as 'strict' | 'lax' | 'none',
       path: "/",
       maxAge: 24 * 60 * 60 * 1000, // 24 heures
-      domain: undefined,
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
     };
 
-    // Ajustement des options selon l'environnement
+    // Ajustements spécifiques selon l'environnement
     switch (nodeEnv) {
       case 'development':
-        // Développement local - options permissives pour faciliter le debug
-        console.log('🛠️ Cookies en développement: permissif pour debug');
+        // Tout est en local, configuration la plus permissive
+        console.log('🛠️ Mode développement - Configuration locale');
+        cookieOptions.secure = false;
+        cookieOptions.sameSite = 'lax';
         break;
 
       case 'production':
-        // Production locale (Docker) - plus sécurisé mais compatible local
-        cookieOptions.httpOnly = true;
-        console.log('🏭 Cookies en production locale: sécurité standard');
+        // Frontend/Backend en local, BDD en ligne
+        // Comme c'est toujours en localhost, on garde une config permissive
+        console.log('🏭 Mode production - Configuration localhost avec BDD en ligne');
+        cookieOptions.secure = false; // Pas de HTTPS en local
+        cookieOptions.sameSite = 'lax';
         break;
 
       case 'deploy':
-        // Déploiement (Render, Vercel) - sécurité maximale pour cross-domain
-        cookieOptions.httpOnly = true;
-        cookieOptions.secure = true;
-        cookieOptions.sameSite = 'none';
-        console.log('🚀 Cookies en déploiement: sécurité maximale pour cross-domain');
+        // Tout est déployé (Vercel/Render)
+        console.log('🚀 Mode déploiement - Configuration pour Vercel/Render');
+        cookieOptions.secure = true; // HTTPS obligatoire
+        cookieOptions.sameSite = 'none'; // Pour le cross-domain
         break;
 
       default:
-        console.log('⚠️ Configuration de cookie par défaut utilisée');
+        console.log('⚠️ Mode non reconnu, utilisation de la configuration par défaut');
     }
 
-    console.log(`🍪 Cookie configuré: httpOnly=${cookieOptions.httpOnly}, secure=${cookieOptions.secure}, sameSite=${cookieOptions.sameSite}`);
+    console.log('📝 Configuration finale des cookies:', {
+      httpOnly: cookieOptions.httpOnly,
+      secure: cookieOptions.secure,
+      sameSite: cookieOptions.sameSite,
+      path: cookieOptions.path,
+      env: nodeEnv
+    });
 
-    // Définition du cookie avec les options configurées
+    // Définition du cookie principal
     response.cookie("accessToken", result.access_token, cookieOptions);
 
-    console.log("🔑 Token:", result.access_token.substring(0, 15) + "...");
+    // Cookie de backup avec configuration alternative
+    response.cookie("accessToken_backup", result.access_token, {
+      ...cookieOptions,
+      sameSite: 'lax' // Pour assurer une compatibilité maximale
+    });
+
+    console.log("🔑 Token défini dans les cookies");
     return result;
   }
 
