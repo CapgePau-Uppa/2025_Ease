@@ -38,22 +38,20 @@
 }
 
 /* Boutons génériques */
-.btn {
+.btn, .refresh-btn {
   padding: 10px 20px;
   border: none;
-  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.3s ease-in-out;
 }
 
 .btn-cancel {
   background-color: #ccc;
-  border-radius: 20px;
-  transition: all 0.3s ease-in-out;
 }
 
 .btn-save {
   background-color: #0f5e08;
-  border-radius: 20px;
-  transition: all 0.3s ease-in-out;
+  
   color: #c7c6c6;
 }
 

@@ -75,6 +75,32 @@ export class ProductsService {
     }
   }
 
+  /**
+   * @brief Retrieves products by its location.
+   */
+  async getProductByLocation(location: string) {
+    try {
+      const products = (await this.databaseService.getProductByLocation(location)) ?? [];
+      const externalProducts = (await this.getOFFAroundMe(location)) ?? [];
+
+      const combinedResults = [...products, ...externalProducts];
+
+      if (combinedResults.length === 0) {
+        throw new NotFoundException(`⚠️ No products found around: "${location}".`);
+      }
+
+      return combinedResults;
+    } catch (error) {
+      // Propagate NotFoundException if it's already thrown
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      console.error("❌ Error retrieving products by location:", error);
+      throw new InternalServerErrorException("Error retrieving products by location.");
+    }
+  }
+
   // ========================================================================
   // ======================== ALTERNATIVE PRODUCT SEARCH
   // ========================================================================
@@ -271,7 +297,6 @@ export class ProductsService {
    */
   private async getOFFAlternatives(criteria: any): Promise<any[]> {
     try {
-      console.log("🌍 Searching via Open Food Facts with criteria:", criteria);
       let results: any;
       // if user's only looking for food
       if (criteria.category === 'Food' && !criteria.productSource && !criteria.tags) {
@@ -285,21 +310,50 @@ export class ProductsService {
         });
       }
       // normalize the results
-      return results.map(product => ({
-        id: product.code,
-        name: product.product_name || 'Unknown name',
-        brand: product.brands || 'Unknown brand',
-        category: product.categories || 'Unknown category',
-        tags: product._keywords || 'Unknown tags',
-        ecoscore: product.ecoscore_grade || 'Unavailable',
-        country: product.origin || 'Unavailable',
-        manufacturing_places: product.manufacturing_places || 'Unavailable',
-        image: product.image_front_url || null,
-        source: "OpenFoodFacts",
-      }));
-
+      return this.normalizeOFFProducts(results);
     } catch (error) {
       console.error("❌ Error during Open Food Facts search:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Normalizes products from Open Food Facts to a consistent format
+   * @param products Raw products from Open Food Facts API
+   * @returns Normalized products with consistent structure
+   */
+  private normalizeOFFProducts(products: any[]): any[] {
+    return products.map(product => ({
+      id: product.code,
+      name: product.product_name || 'Unknown name',
+      brand: product.brands || 'Unknown brand',
+      category: product.categories || 'Unknown category',
+      tags: product._keywords || 'Unknown tags',
+      ecoscore: product.ecoscore_grade || 'Unavailable',
+      country: product.origin || 'Unavailable',
+      manufacturing_places: product.manufacturing_places || 'Unavailable',
+      image: product.image_front_url || null,
+      source: "OpenFoodFacts",
+    }));
+  }
+
+  /**
+   * @brief Retrieves products from Open Food Facts based on a specified location.
+   * 
+   * @param location The location to search for products (e.g., city or region).
+   * @return A promise resolving to an array of normalized product data.
+   * 
+   * @note If an error occurs during the API request, an empty array is returned.
+   * @warning Ensure the `openFoodFactsService` is properly configured and available.
+   */
+  private async getOFFAroundMe(location: string): Promise<any[]> {
+    try {
+      // Get products from Open Food Facts by location
+      const results = await this.openFoodFactsService.searchProductsByLocation(location);
+      // Normalize the results using the existing function
+      return this.normalizeOFFProducts(results);
+    } catch (error) {
+      console.error(`❌ Error finding products around ${location}:`, error);
       return [];
     }
   }
@@ -331,7 +385,6 @@ export class ProductsService {
       // Merge results from both sources
       const combinedResults = [...internalResults, ...externalResults];
 
-      console.log(`📦 Found ${combinedResults.length} products matching filters.`);
       return combinedResults;
     } catch (error) {
       console.error("❌ Error during filtered product search:", error);
@@ -360,29 +413,4 @@ export class ProductsService {
     }
   }
 
-  /**
- * @brief Retrieves products by its location.
- */
-  async getProductByLocation(location: string) {
-    try {
-      const products = (await this.databaseService.getProductByLocation(location)) ?? [];
-      const externalProducts = (await this.getOFFAroundMe(location)) ?? [];
-
-      const combinedResults = [...products, ...externalProducts];
-
-      if (combinedResults.length === 0) {
-        throw new NotFoundException(`⚠️ No products found around: "${location}".`);
-      }
-
-      return combinedResults;
-    } catch (error) {
-      // Propagate NotFoundException if it's already thrown
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      console.error("❌ Error retrieving products by location:", error);
-      throw new InternalServerErrorException("Error retrieving products by location.");
-    }
-  }
 }

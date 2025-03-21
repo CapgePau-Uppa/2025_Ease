@@ -18,7 +18,6 @@ import { ProductsModule } from "./products/products.module";
 import { OpenFoodFactsModule } from "./apiServices/openFoodFacts/openFoodFacts.module";
 import { CountriesModule } from "./apiServices/countries/countries.module";
 import { UnsplashModule } from "./apiServices/unsplash/unsplash.module";
-import { LocationModule } from "./apiServices/LocationService/locationService.module";
 // Environment variables configuration
 import { ConfigModule } from "@nestjs/config";
 import * as Joi from "joi";
@@ -44,7 +43,6 @@ import { AdminModule } from "./admin/admin.module";
     OpenFoodFactsModule,
     CountriesModule,
     UnsplashModule,
-    LocationModule,
     /**
      * @brief Loads environment variables and validates them with Joi.
      *

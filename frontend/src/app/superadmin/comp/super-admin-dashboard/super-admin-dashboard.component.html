@@ -1,10 +1,15 @@
 <div class="dashboard-container">
-  <!-- Tab bar -->
-  <nav class="tab-bar">
+  <!-- Bouton burger visible en responsive -->
+  <button class="burger-btn" [class.open]="menuOpen" (click)="toggleMenu()">
+    <i class="fa-solid fa-arrow-right"></i>
+  </button>
+
+  <!-- Barre latérale -->
+  <nav class="tab-bar" [class.open]="menuOpen">
     <a [class.active]="activeTab === 'stats'" (click)="selectTab('stats')">
       <i class="fa-solid fa-chart-pie"></i>Statistiques
     </a>
-    <a [class.active]="activeTab === 'users' " (click)="selectTab('users')">
+    <a [class.active]="activeTab === 'users'" (click)="selectTab('users')">
       <i class="fa-solid fa-users-gear"></i>Utilisateurs
     </a>
     <a [class.active]="activeTab === 'products'" (click)="selectTab('products')">
@@ -12,15 +17,10 @@
     </a>
   </nav>
 
-  <!-- Content depending on selected tab -->
+  <!-- Contenu -->
   <div class="tab-content">
-    <!-- If the tab is 'stats', it displays <app-stats>. -->
     <app-stats *ngIf="activeTab === 'stats'"></app-stats>
-
-    <!-- If the tab is 'users', it displays <app-user-management>. -->
     <app-users *ngIf="activeTab === 'users' && isAuthorized" class="app-users"></app-users>
-
-    <!-- If the tab is 'products', it displays <app-product-requests>. -->
     <app-product-requests *ngIf="activeTab === 'products'"></app-product-requests>
   </div>
 </div>

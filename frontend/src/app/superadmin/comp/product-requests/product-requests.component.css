@@ -6,15 +6,21 @@ body {
   padding: 0;
 }
 
-/* 🏗️ Conteneur principal */
+.requests-content{
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+/* Conteneur principal */
 .product-requests-container {
   display: flex;
   gap: 20px;
   align-items: flex-start;
+  flex-direction: column;
   padding: 20px;
 }
 
-/* 📌 Liste des produits et des marques */
+/* Liste des produits et des marques */
 .requests-column {
   display: flex;
   flex-direction: column;
@@ -22,7 +28,7 @@ body {
   width: 320px;
 }
 
-/* 📌 Conteneur des produits et marques */
+/* Conteneur des produits et marques */
 .requests-list {
   background: #fff;
   padding: 15px;
@@ -36,7 +42,7 @@ body {
   font-size: 1.2rem;
 }
 
-/* 🎨 Cartes des demandes */
+/* Cartes des demandes */
 .request-card {
   background: #fff;
   border-radius: 10px;
@@ -157,7 +163,7 @@ body {
   box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
 }
 
-/* 🚫 Bouton CANCEL */
+/* Bouton CANCEL */
 .details-actions .cancel-btn {
   background: linear-gradient(135deg, #dc3545, #c82333);
   color: #fff;
@@ -170,7 +176,7 @@ body {
   box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
 }
 
-/* 🏷️ Amélioration des tags */
+/* Amélioration des tags */
 .tags-input-container {
   display: flex;
   flex-wrap: wrap;
@@ -188,7 +194,7 @@ body {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
 }
 
-/* 💡 Style des tags */
+/* Style des tags */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -200,7 +206,7 @@ body {
   transition: background 0.3s ease-in-out;
 }
 
-/* ❌ Bouton de suppression des tags */
+/* Bouton de suppression des tags */
 .tag button {
   background: none;
   border: none;
@@ -215,7 +221,7 @@ body {
   color: #ffdddd;
 }
 
-/* ✏️ Input des tags */
+/* Input des tags */
 .tags-input-container input {
   flex: 1;
   min-width: 120px;
@@ -230,12 +236,12 @@ body {
   color: #333;
 }
 
-/* 🎯 Effet sur l'ensemble */
+/* Effet sur l'ensemble */
 .request-details:focus-within {
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
 }
 
-/* 📌 Alignement des boutons Validate & Refuse */
+/* Alignement des boutons Validate & Refuse */
 .validate-actions {
   display: flex;
   justify-content: center;
@@ -243,7 +249,7 @@ body {
   margin-top: 25px;
 }
 
-/* 🟢 Bouton VALIDATE */
+/* Bouton VALIDATE */
 .accept-btn {
   background: linear-gradient(135deg, #28a745, #218838);
   color: white;
@@ -264,7 +270,7 @@ body {
   box-shadow: 0 5px 10px rgba(40, 167, 69, 0.4);
 }
 
-/* 🔴 Bouton REFUSE */
+/* Bouton REFUSE */
 .reject-btn {
   background: linear-gradient(135deg, #dc3545, #c82333);
   color: white;
@@ -344,4 +350,122 @@ body {
   border-radius: 8px;
   margin: 1rem 0;
   color: #6c757d;
+}
+
+/** Filters */
+/* Styles pour les contrôles de filtrage */
+.filter-controls {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-controls h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #495057;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-btn {
+  padding: 8px 12px;
+  background-color: #e9ecef;
+  border: none;
+  border-radius: 4px;
+  color: #495057;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: #dee2e6;
+}
+
+.filter-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Styles pour les indicateurs de statut sur les cartes */
+.request-card {
+  position: relative;
+  padding-left: 15px;
+  border-left: 4px solid transparent;
+}
+
+.status-add {
+  border-left-color: #28a745;
+}
+
+.status-edit {
+  border-left-color: #fd7e14;
+}
+
+.status-delete {
+  border-left-color: #dc3545;
+}
+
+/* Styles pour les badges de type de demande */
+.request-type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.badge-add {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-edit {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-delete {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-default {
+  background-color: #e9ecef;
+  color: #495057;
+}
+@media (max-width: 1200px) {
+  .requests-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .requests-column {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+  }
+
+  .requests-list {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .request-details {
+    width: 100%;
+    min-width: auto;
+    max-width: 600px;
+  }
 }

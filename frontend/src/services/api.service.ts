@@ -110,6 +110,16 @@ export class ApiService {
       })
     );
   }
+
+  /**
+   * Get thje product around a location
+   * @param location 
+   */
+  // TODO
+  getProductsAround(location: string): Observable<any> {
+    console.log('Location:', location);
+    return this.http.get<any[]>(`${this._productsUrl}/location/${location}`);
+  }
   // ======================== SEND/POST
 
   /**

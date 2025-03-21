@@ -42,6 +42,9 @@ export class ProductRequestsComponent implements OnInit {
   brandRequests: any[] = [];    // List of brands requests retrieved from the backend.
   selectedRequest: any = null;  // The currently selected product request.
   tagInput: string = '';        // Input field for adding a new tag to the selected request.
+  // Filters
+  currentFilter: 'all' | 'add' | 'edit' | 'delete' = 'all';
+  filteredProductRequests: any[] = [];
 
   // Indicateurs de chargement
   isLoadingRequests: boolean = false;
@@ -73,13 +76,16 @@ export class ProductRequestsComponent implements OnInit {
       next: (data) => {
         // Extract product requests
         this.productRequests = data
-          .filter(item => item.status === "add-product")  // Identifies products
+          .filter(item => ['add-product', 'edit-product', 'delete-product'].includes(item.status))
           .map(req => ({ ...req, type: 'product' }));     // Assigns the type
 
         // Extract brand requests
         this.brandRequests = data
           .filter(item => item.status === "add-brand")  // Identifies brands
           .map(req => ({ ...req, type: 'brand' }));     // Assigns the type
+
+        // Apply current filter to products
+        this.applyFilter();
 
         this.isLoadingRequests = false;
       },
@@ -128,7 +134,6 @@ export class ProductRequestsComponent implements OnInit {
 
       // Simulate API call with setTimeout
       setTimeout(() => {
-        console.log('✅ Request saved:', this.selectedRequest);
         this.selectedRequest.isEditing = false;
         this.isSavingRequest = false;
       }, 1000);
@@ -236,4 +241,95 @@ export class ProductRequestsComponent implements OnInit {
     }
   }
 
+  // ====================================================
+  // =================== FILTERS FUNCTIONS
+  // ====================================================
+  /**
+   * @brief Sets the current filter and applies it to product requests.
+   * @param filter The filter type: 'all', 'add', 'edit', or 'delete'.
+   */
+  setFilter(filter: 'all' | 'add' | 'edit' | 'delete'): void {
+    this.currentFilter = filter;
+    this.applyFilter();
+  }
+
+  /**
+  * @brief Filters product requests based on the current filter.
+  * 
+  * If the filter is 'all', all requests are displayed. Otherwise, the requests
+  * are filtered based on their status ('add-product', 'edit-product', 'delete-product').
+  */
+  applyFilter(): void {
+    if (this.currentFilter === 'all') {
+      this.filteredProductRequests = [...this.productRequests];
+      return;
+    }
+
+    // Mapping filter types to corresponding status values
+    const statusMap: Record<'add' | 'edit' | 'delete', string> = {
+      'add': 'add-product',
+      'edit': 'edit-product',
+      'delete': 'delete-product'
+    };
+
+    // Use type assertion since 'all' case is already handled
+    const filterKey = this.currentFilter as 'add' | 'edit' | 'delete';
+    this.filteredProductRequests = this.productRequests.filter(
+      request => request.status === statusMap[filterKey]
+    );
+  }
+
+  /**
+  * @brief Returns a CSS class based on the request status.
+  * @param status The status of the product request.
+  * @return The corresponding CSS class name.
+  */
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'add-product':
+        return 'status-add';
+      case 'edit-product':
+        return 'status-edit';
+      case 'delete-product':
+        return 'status-delete';
+      default:
+        return '';
+    }
+  }
+
+  /**
+  * @brief Returns a CSS class for the badge based on the request type.
+  * @param status The status of the product request.
+  * @return The corresponding badge CSS class.
+  */
+  getRequestTypeBadgeClass(status: string): string {
+    switch (status) {
+      case 'add-product':
+        return 'badge-add';
+      case 'edit-product':
+        return 'badge-edit';
+      case 'delete-product':
+        return 'badge-delete';
+      default:
+        return 'badge-default';
+    }
+  }
+
+  /**
+  * @brief Retrieves a user-friendly label for the request type.
+  * @param status The status of the product request.
+  * @return A label representing the request type.
+  */
+  getRequestTypeLabel(status: string): string {
+    switch (status) {
+      case 'add-product':
+        return 'Ajout';
+      case 'edit-product':
+        return 'Modification';
+      case 'delete-product':
+        return 'Suppression';
+      default:
+        return status;
+    }
+  }
 }

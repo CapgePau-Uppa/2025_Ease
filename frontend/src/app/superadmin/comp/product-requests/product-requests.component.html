@@ -1,68 +1,91 @@
 <div class="product-requests-container">
-  <!-- Indicateur de chargement global -->
+  <!-- Global loading indicator -->
   <div class="loading-container" *ngIf="isLoadingRequests">
     <div class="loading-spinner">
       <i class="fas fa-spinner spinner-rotate"></i>
     </div>
     <p>Chargement des demandes de produits et de marques...</p>
   </div>
-
-  <!-- Contenu principal (affiché uniquement quand les données sont chargées) -->
+    <!-- Filters for product requests -->
+    <div class="filter-controls" *ngIf="!isLoadingRequests">
+      <h3>Filtres</h3>
+      <div class="filter-buttons">
+        <button class="filter-btn" [ngClass]="{'active': currentFilter === 'all'}" (click)="setFilter('all')">
+          Toutes les demandes
+        </button>
+        <button class="filter-btn" [ngClass]="{'active': currentFilter === 'add'}" (click)="setFilter('add')">
+          Ajouts
+        </button>
+        <button class="filter-btn" [ngClass]="{'active': currentFilter === 'edit'}" (click)="setFilter('edit')">
+          Modifications
+        </button>
+        <button class="filter-btn" [ngClass]="{'active': currentFilter === 'delete'}" (click)="setFilter('delete')">
+          Suppressions
+        </button>
+      </div>
+    </div>
+  <!-- Main content (displayed only when data is loaded) -->
   <div class="requests-content" *ngIf="!isLoadingRequests">
-    <!-- Colonne gauche : Produits + Marques -->
+    <!-- Left column: Products + Brands -->
+    
     <div class="requests-column">
+      
+
+      <!-- Product requests list -->
       <div class="requests-list">
-        <h3>Products</h3>
-        <div class="request-card" *ngFor="let req of productRequests" (click)="selectRequest(req)"
+        <h3>Produits</h3>
+        <div class="request-card" *ngFor="let req of filteredProductRequests" (click)="selectRequest(req)"
           [ngClass]="{ selected: selectedRequest && selectedRequest.id === req.id }">
+          <div class="request-status-indicator" [ngClass]="getStatusClass(req.status)"></div>
           <h4>{{ req.name }}</h4>
           <p>{{ req.category }} - {{ req.FK_Brands }}</p>
-          <p>Status: {{ req.status }}</p>
+          <p>Statut: {{ req.status }}</p>
         </div>
-        <!-- Message si aucun produit -->
-        <div class="no-requests" *ngIf="productRequests.length === 0">
-          <p>Aucune demande de produit</p>
+        <!-- Message if no products -->
+        <div class="no-requests" *ngIf="filteredProductRequests.length === 0">
+          <p>Aucune demande de produit{{ currentFilter !== 'all' ? ' pour ce filtre' : '' }}</p>
         </div>
       </div>
 
+      <!-- Brand requests list -->
       <div class="requests-list">
-        <h3>Brands</h3>
+        <h3>Marques</h3>
         <div class="request-card" *ngFor="let req of brandRequests" (click)="selectRequest(req)"
           [ngClass]="{ selected: selectedRequest && selectedRequest.id === req.id }">
           <h4>{{ req.name }}</h4>
           <p>{{ req.description }}</p>
-          <p>Status: {{ req.status }}</p>
+          <p>Statut: {{ req.status }}</p>
         </div>
-        <!-- Message si aucune marque -->
+        <!-- Message if no brands -->
         <div class="no-requests" *ngIf="brandRequests.length === 0">
           <p>Aucune demande de marque</p>
         </div>
       </div>
     </div>
 
-    <!-- Colonne droite : Zone d'édition -->
+    <!-- Right column: Edit zone -->
     <div class="request-details" *ngIf="selectedRequest">
       <div class="details-header">
         <h3>{{ selectedRequest.name }}</h3>
         <button class="edit-btn" *ngIf="!selectedRequest.isEditing" (click)="editRequest()">
-          <i class="fas fa-pencil-alt"></i> Edit
+          <i class="fas fa-pencil-alt"></i> Modifier
         </button>
       </div>
 
       <div class="details-content">
         <ng-container *ngIf="selectedRequest?.type === 'product'">
           <div class="detail-item">
-            <label>Category:</label>
+            <label>Catégorie:</label>
             <span *ngIf="!selectedRequest.isEditing">{{ selectedRequest.category }}</span>
             <input *ngIf="selectedRequest.isEditing" [(ngModel)]="selectedRequest.category" />
           </div>
           <div class="detail-item">
-            <label>Brand:</label>
+            <label>Marque:</label>
             <span *ngIf="!selectedRequest.isEditing">{{ selectedRequest.FK_Brands }}</span>
             <input *ngIf="selectedRequest.isEditing" [(ngModel)]="selectedRequest.FK_Brands" />
           </div>
           <div class="detail-item">
-            <label>Quantity:</label>
+            <label>Quantité:</label>
             <span *ngIf="!selectedRequest.isEditing">{{ selectedRequest.quantity }}</span>
             <input type="number" *ngIf="selectedRequest.isEditing" [(ngModel)]="selectedRequest.quantity" />
           </div>
@@ -84,24 +107,32 @@
                   {{ tag }}
                   <button type="button" (click)="removeTag(tag)">x</button>
                 </span>
-                <input id="tags" type="text" placeholder="Type a tag and press Enter" [(ngModel)]="tagInput"
+                <input id="tags" type="text" placeholder="Tapez un tag et appuyez sur Entrée" [(ngModel)]="tagInput"
                   (keydown)="addTag($event)" />
               </div>
             </ng-template>
           </div>
+          <div class="detail-item">
+            <label>Type de demande:</label>
+            <span class="request-type-badge" [ngClass]="getRequestTypeBadgeClass(selectedRequest.status)">
+              {{ getRequestTypeLabel(selectedRequest.status) }}
+            </span>
+          </div>
         </ng-container>
 
+        <!-- Status selection -->
         <div class="detail-item">
-          <label>Status:</label>
+          <label>Statut:</label>
           <span *ngIf="!selectedRequest.isEditing">{{ selectedRequest.status }}</span>
           <select *ngIf="selectedRequest.isEditing" [(ngModel)]="selectedRequest.status">
-            <option value="En attente">Pending</option>
-            <option value="Validé">Validated</option>
-            <option value="Refusé">Rejected</option>
+            <option value="Pending">En attente</option>
+            <option value="Validated">Validé</option>
+            <option value="Rejected">Refusé</option>
           </select>
         </div>
       </div>
 
+      <!-- Action buttons for saving or canceling -->
       <div class="details-actions" *ngIf="selectedRequest.isEditing">
         <button class="save-btn" (click)="saveRequest()" [disabled]="isSavingRequest">
           <i class="fas" [ngClass]="{'spinner-rotate fa-spinner': isSavingRequest, 'fa-check': !isSavingRequest}"></i>
@@ -112,13 +143,13 @@
         </button>
       </div>
 
-      <!-- 📌 Boutons Validate & Refuse bien en évidence -->
+      <!-- Validate & Reject buttons -->
       <div class="validate-actions" *ngIf="!selectedRequest.isEditing">
         <button class="accept-btn" (click)="validateRequest(selectedRequest, 'Validated')">
-          <i class="fas fa-check-circle"></i> Validate
+          <i class="fas fa-check-circle"></i> Valider
         </button>
         <button class="reject-btn" (click)="validateRequest(selectedRequest, 'Rejected')">
-          <i class="fas fa-times-circle"></i> Refuse
+          <i class="fas fa-times-circle"></i> Refuser
         </button>
       </div>
     </div>

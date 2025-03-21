@@ -1028,25 +1028,18 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * @brief Retrieves products associated with a specified brand.
-   *
-   * @details
-   * Executes a N1QL query that performs a join between the products and brands buckets.
-   * This function searches for products whose foreign key (`FK_Brands`) matches the given brand name.
-   *
-   * @param brandName The name of the brand to search for.
-   *
-   * @returns {Promise<any[]>} An array of objects containing product and brand names.
-   *
-   * @throws {Error} Throws an error if the query execution fails.
+   * @brief Retrieves products associated with a specific brand.
+   * 
+   * @param {string} brandName - The name of the brand.
+   * @returns {Promise<any[]>} - List of products associated with the brand.
    */
   async getProductsByBrand(brandName: string): Promise<any[]> {
     const query = `
-      SELECT p.name AS productName, b.name AS brandName
-      FROM \`${this.productsBucket.name}\` p
-      JOIN \`${this.brandBucket.name}\` b ON KEYS p.FK_Brands
-      WHERE b.name = $brandName
-    `;
+    SELECT META(p).id AS productId, p.name AS productName, b.name AS brandName, p.*  
+    FROM \`${this.productsBucket.name}\`._default._default p
+    JOIN \`${this.brandBucket.name}\`._default._default b ON KEYS p.FK_Brands
+    WHERE b.name = $brandName
+  `;
 
     return this.executeQuery(query, { brandName });
   }
@@ -1086,6 +1079,39 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return result[0];
   }
 
+  /**
+   * @brief Retrieves products based on a specified location.
+   * 
+   * @param location The location to search for products (e.g., city or region).
+   * @return A promise resolving to an array of products matching the location.
+   * 
+   * @note If no products are found for the given location, an empty array is returned.
+   * @warning Ensure the `origin` field exists in the database schema.
+   */
+  async getProductByLocation(location: string): Promise<any[]> {
+    const lowercaseLocation = location.toLowerCase();
+   
+    const query = `
+      SELECT META(p).id AS id, p.*
+      FROM \`${this.productsBucket.name}\`._default._default p
+      WHERE LOWER(p.origin) = $location;
+    `;
+   
+    const result = await this.executeQuery(query, { location: lowercaseLocation });
+   
+    if (result.length === 0) {
+      console.log(`No products found for location: ${location}`);
+      return [];
+    }
+   
+    // Add default "source" field for products without one
+    return result.map(product => {
+      if (!product.source) {
+        return { ...product, source: "Internal" };
+      }
+      return product;
+    });
+  }
   // ========================================================================
   // ======================== BRANDS FUNCTIONS
   // ========================================================================
@@ -1174,9 +1200,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    */
   async getBrandById(brandId: string): Promise<any> {
     const query = `
-    SELECT META(b).id AS docId, b.*
+    SELECT META(b).id AS id, b.*
     FROM \`${this.brandBucket.name}\`._default._default b
-    WHERE b.id = $brandId
+    WHERE META(b).id = $brandId
   `;
 
     const result = await this.executeQuery(query, { brandId });
@@ -1380,14 +1406,51 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async deleteEntity(type: string, entityId: string): Promise<any> {
     if (!entityId) {
       throw new BadRequestException(`❌ Invalid parameters: ${type} ID is required.`);
-    }
-
+    }  
     // Determine which entity type to delete
     switch (type) {
       case 'product':
         return this.deleteProduct(entityId);
       case 'brand':
-        return this.deleteBrand(entityId);
+        try {
+          // First get the brand to access its name
+          const brand = await this.getBrandById(entityId); 
+          if (!brand) {
+            console.warn(`⚠️ Brand with ID '${entityId}' not found. Nothing to delete.`);
+            return { message: `Brand with ID '${entityId}' does not exist or was already deleted.` };
+          }
+          
+          const brandName = brand.name;
+          // Get all products associated with this brand name
+          const productsByBrand = await this.getProductsByBrand(brandName);         
+          if (productsByBrand.length > 0) {            
+            // Update each product's status to 'edit-product'
+            let updatedCount = 0;
+            for (const product of productsByBrand) {
+              // Use the productId field
+              const productId = product.productId;
+              
+              if (!productId) {
+                console.error(`❌ Missing productId for product:`, product);
+                continue;
+              }
+              try {
+                await this.updateProduct(productId, { status: 'edit-product' });
+                updatedCount++;
+              } catch (error) {
+                console.error(`❌ Failed to update product ${productId}: ${error.message}`);
+              }
+            }
+          } else {
+            console.warn(`ℹNo products found associated with brand "${brandName}"`);
+          }
+          
+          // Now delete the brand
+          return this.deleteBrand(entityId); 
+        } catch (error) {
+          console.error(`❌ Error deleting brand: ${error.message}`, error);
+          throw error;
+        }
       default:
         throw new BadRequestException(`❌ Invalid entity type: ${type}`);
     }

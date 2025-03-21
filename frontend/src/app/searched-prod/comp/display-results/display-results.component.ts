@@ -91,7 +91,7 @@ export class DisplayResultsComponent implements OnInit {
   goToProduct(product: any): void {
     if (product?.id) {
       this.router.navigate([`/products-alternative/${product.id}/${product.source}`])
-        .then(() => console.log(`✅ Navigated to /products-alternative/${product.id}/${product.source}`))
+        .then(() => console.log(`Navigated to /products-alternative/${product.id}/${product.source}`))
         .catch(error => console.error("❌ Navigation error:", error));
     } else {
       console.warn("⚠️ Invalid product or missing ID");

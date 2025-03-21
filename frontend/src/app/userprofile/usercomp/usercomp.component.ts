@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { HistoryComponent } from './history/history.component';
 // Services
 import { AuthService } from '../../../services/auth/auth.service';
-import { LocationService } from '../../../services/location/location.service';
 @Component({
   selector: 'app-usercomp',
   imports: [CommonModule, HistoryComponent],
@@ -16,7 +15,6 @@ export class UsercompComponent implements OnInit {
   isAuthenticated = false; // Tracks user authentication status.
   userRole: string | null = null; // Stores the user role.
   userInfo: any // User's infos
-  location: string = 'Chargement...';
 
   /**
    * @brief Constructor injecting authentication service.
@@ -24,7 +22,6 @@ export class UsercompComponent implements OnInit {
    */
   constructor(
     private authService: AuthService,
-    private locationService: LocationService,
   ) { }
 
   /**
@@ -40,15 +37,6 @@ export class UsercompComponent implements OnInit {
     });
     // retrieves user info
     this.userInfo = this.authService.getUserInfo();
-    this.locationService.getLocation().subscribe({
-      next: (data) => {
-        this.location = `${data.city}, ${data.country}`;
-      },
-      error: (error) => {
-        console.error("Error retrieving location", error);
-        this.location = "Location not available";
-      }
-    });
   }
 
   // How to change tabs

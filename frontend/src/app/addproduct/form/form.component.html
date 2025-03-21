@@ -8,9 +8,9 @@
         <h2>Status</h2>
         <select class="status" [(ngModel)]="product.status">
           <option value="">Select a status</option>
-          <option value="add-product">Add-product</option>
-          <option value="edit-product">Edit-product</option>
-          <option value="delete-product">Delete-product</option>
+          <option value="add-product">Ajouter un produit</option>
+          <option value="edit-product">Modifier un produit</option>
+          <option value="delete-product">Supprimer un produit</option>
         </select>
       </div>
 
@@ -37,8 +37,7 @@
           <option *ngFor="let b of brands" [value]="b">{{ b }}</option>
           <option value="other">Other (Add New)</option>
         </select>
-        <button (click)="refreshBrands()">🔄 Refresh brand list</button>
-
+        
 
         <!-- Champ de saisie pour une nouvelle marque (affiché seulement si "Other" est sélectionné) -->
         <input
@@ -56,47 +55,13 @@
         rows="3"
       ></textarea>
 
-        <!-- Bar Code-->
-        <label for="sku">Bar Code</label>
-        <input
-          id="sku"
-          type="text"
-          placeholder="Type a bar code and press Enter"
-          [(ngModel)]="product.id"
-        />
-
-        <!-- Eco-score-->
-        <label for="sku">Eco-score</label>
-        <input
-          id="sku"
-          type="text"
-          placeholder="Type a Eco-score and press Enter"
-          [(ngModel)]="product.ecoscore"
-        />
-
-        <!-- Tags affichés sous forme d'étiquettes intégrées dans l'input -->
-        <label for="tags">Tags</label>
-        <div class="tags-input-container">
-          <span class="tag" *ngFor="let tag of product.tags">
-            {{ tag }} <button type="button" (click)="removeTag(tag)">x</button>
-          </span>
-          <input
-            id="tags"
-            type="text"
-            placeholder="Type a tag and press Enter"
-            [(ngModel)]="tagInput"
-            (keydown)="addTag($event)"
-          />
-        </div>
-
-        <!-- Countries (Origin) -->
-        <label for="origin">Origin</label>
-        <select id="origin" [(ngModel)]="product.origin">
-          <option value="">Select a country</option>
-          <option *ngFor="let country of countries" [value]="country">
-            {{ country }}
-          </option>
-        </select>
+      <label for="sku">Bar Code</label>
+      <input
+        id="sku"
+        type="text"
+        placeholder="Type a bar code and press Enter"
+        [(ngModel)]="product.id"
+      />
       </div>
     </div>
 
@@ -128,13 +93,40 @@
           </p>
         </div>
 
-        <!-- 
-        <div class="card">
-          <h2>Pricing</h2>
-          <label for="price">Price</label>
-          <input id="price" type="number" [(ngModel)]="product.price" />
+  
+        <div class="card">  
+          <!-- Eco-score-->
+        <label for="sku">Eco-score</label>
+        <input
+          id="sku"
+          type="text"
+          placeholder="Type a Eco-score and press Enter"
+          [(ngModel)]="product.ecoscore"
+        />
+          <!-- Tags affichés sous forme d'étiquettes intégrées dans l'input -->
+          <label for="tags">Tags</label>
+          <div class="tags-input-container">
+            <span class="tag" *ngFor="let tag of product.tags">
+              {{ tag }} <button type="button" (click)="removeTag(tag)">x</button>
+            </span>
+            <input
+              id="tags"
+              type="text"
+              placeholder="Type a tag and press Enter"
+              [(ngModel)]="tagInput"
+              (keydown)="addTag($event)"
+            />
+          </div>
+
+          <!-- Countries (Origin) -->
+          <label for="origin">Origin</label>
+          <select id="origin" [(ngModel)]="product.origin">
+            <option value="">Select a country</option>
+            <option *ngFor="let country of countries" [value]="country">
+              {{ country }}
+            </option>
+          </select>
         </div>
-        -->
       </div>
 
       <div class="actions">

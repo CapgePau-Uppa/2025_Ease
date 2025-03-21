@@ -1,0 +1,133 @@
+.location-dropdown {
+    position: absolute;
+    top: 55px; /* Ajustez cette valeur pour positionner le dropdown sous le bouton */
+    right: 15px; /* Aligné avec le padding droit de la searchbar */
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
+    z-index: 13;
+    min-width: 320px;
+    padding: 20px;
+    animation: slideDown 0.3s ease;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .location-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .location-dropdown-menu h3 {
+    margin: 0;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    color: #333;
+    text-align: center;
+  }
+  
+  .location-input-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .location-input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    padding: 0 15px;
+    background: #f9f9f9;
+  }
+  
+  .location-icon {
+    margin-right: 10px;
+    color: #666;
+    font-size: 16px;
+  }
+  
+  .location-input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    background: transparent;
+  }
+  
+  .location-input:focus {
+    outline: none;
+  }
+  
+  .clear-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    font-size: 16px;
+  }
+  
+  .search-location-button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4285f4;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+  }
+  
+  .search-location-button:hover {
+    background-color: #3367d6;
+  }
+  
+  .recent-locations {
+    width: 100%;
+    margin-top: 15px;
+  }
+  
+  .recent-locations h4 {
+    margin-bottom: 10px;
+    font-size: 1em;
+    color: #666;
+    text-align: center;
+  }
+  
+  .recent-locations ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .recent-locations li {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .recent-locations li:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .recent-locations li i {
+    margin-right: 10px;
+    color: #999;
+  }
+  

@@ -165,7 +165,6 @@ export class AdminService {
     );
   }
 
-
   // Récupère le rôle de l'utilisateur actuel
   getCurrentUserRole(): Observable<string> {
     console.log('🔄 Récupération du rôle utilisateur...');

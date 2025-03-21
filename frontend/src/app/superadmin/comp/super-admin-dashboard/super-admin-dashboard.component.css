@@ -6,22 +6,24 @@
   padding: 0;
   font-family: 'Geologica', sans-serif;
   background: #f8f9fd; /* Fond général clair (optionnel) */
+  position: relative;
 }
 
 /* Barre latérale */
 .tab-bar {
-  width: 320px;
+  width: 300px;
   background: #ffffff; /* Fond blanc */
   padding: 20px;
   border-right: 1px solid #eee; /* Séparation légère */
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease;
 }
 
 /* Boutons (onglets) de la barre latérale */
 .tab-bar a {
-  display: flex;             /* Pour pouvoir centrer icône+texte si tu veux */
-  align-items: center;       /* Aligner verticalement */
+  display: flex;             /* Pour centrer icône+texte */
+  align-items: center;       /* Alignement vertical */
   gap: 10px;                 /* Espace entre icône et texte */
   margin-bottom: 10px;
   padding: 15px 20px;
@@ -32,22 +34,20 @@
   font-weight: 700;
   border-radius: 15px;
   cursor: pointer;
-  transition: all 0.3s  ease-in-out;
-
+  transition: all 0.3s ease-in-out;
 }
 
-/* Au survol, on change la couleur de fond/texte pour un effet hover */
+/* Au survol */
 .tab-bar a:hover {
   color: #1cac53;
   transform: scale(1.05); /* Zoom au survol */
-  transition: all 0.3s  ease-in-out;
   background-color: #eee;
 }
 
 /* Bouton actif (onglet sélectionné) */
 .tab-bar a.active {
   color: #0a7c22;
-  transform: scale(1.03); /* Zoom au survol */
+  transform: scale(1.03);
 }
 
 /* Contenu à droite */
@@ -55,5 +55,58 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  background: #f8f9fd; /* Même fond clair que le container */
+  background: #f8f9fd;
+}
+
+/* Bouton burger (invisible en desktop) */
+.burger-btn {
+  display: none;
+}
+
+/* === Responsive : mode burger pour la barre latérale === */
+@media screen and (max-width: 768px) {
+  /* Masquer la barre latérale en la déplaçant hors écran */
+  .tab-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+  }
+  /* Lorsque le menu est ouvert, on retire la translation */
+  .tab-bar.open {
+    transform: translateX(0);
+  }
+  
+  /* Afficher le bouton burger */
+  .burger-btn {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1100;
+    background: #fff;
+    border: none;
+    padding: 10px;
+    font-size: 1.5em;
+    cursor: pointer;
+    border-radius: 0px 15px 15px 0px;
+    transition: transform 0.3s ease;
+
+  }
+  .burger-btn.open{
+    transform: translateX(300px);
+  }
+  .fa-arrow-right{
+    transition: all 0.3s ease-in-out;
+  }
+  .burger-btn.open .fa-arrow-right{
+    transition: all 0.3s ease-in-out;
+    transform: rotate(180deg);
+  }
+  /* Pour le contenu, ajouter un padding afin d'éviter qu'il soit caché derrière le bouton */
+  .tab-content {
+    padding-top: 60px;
+  }
 }

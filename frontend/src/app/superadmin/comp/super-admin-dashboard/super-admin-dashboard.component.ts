@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-
-// Dashboard Comp
+// Dashboard Components
 import { StatsComponent } from '../stats/stats.component';
 import { ProductRequestsComponent } from '../product-requests/product-requests.component';
 import { UsersComponent } from '../users/users.component';
@@ -13,21 +12,28 @@ import { UsersService } from '../../../../services/users/users.service';
   selector: 'app-super-admin-dashboard',
   imports: [StatsComponent, ProductRequestsComponent, UsersComponent, CommonModule],
   templateUrl: './super-admin-dashboard.component.html',
-  styleUrl: './super-admin-dashboard.component.css'
+  styleUrls: ['./super-admin-dashboard.component.css']
 })
-export class SuperAdminDashboardComponent {
+export class SuperAdminDashboardComponent implements OnInit {
   activeTab: string = 'stats';
+  isAuthorized: boolean = false;
+  menuOpen: boolean = false; // Pour le menu burger en mode responsive
 
-  // How to change tabs
-  selectTab(tabName: string) {
-    this.activeTab = tabName;
+  constructor(private usersService: UsersService) { }
+
+  ngOnInit(): void {
+    const userRole = this.usersService.getUserRole()?.toLowerCase();
+    this.isAuthorized = userRole === 'superadmin' || userRole === 'admin';
   }
-   isAuthorized: boolean = false;
-  
-    constructor(private usersService: UsersService) { }
-  
-    ngOnInit() {
-      const userRole = this.usersService.getUserRole()?.toLowerCase();
-      this.isAuthorized = userRole === 'superadmin' || userRole === 'admin';
-    }
+
+  // Changer d'onglet et fermer le menu burger si ouvert
+  selectTab(tabName: string): void {
+    this.activeTab = tabName;
+    this.menuOpen = false;
+  }
+
+  // Basculer l'affichage du menu burger
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
 }
