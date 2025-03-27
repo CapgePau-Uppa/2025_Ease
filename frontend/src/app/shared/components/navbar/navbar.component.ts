@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
-import { SearchbarComponent } from '../../../homepage/home/comp/searchbar/searchbar.component';
+import { SearchbarComponent } from '../searchbar/searchbar.component';
 
 /**
  * @brief Navbar component for handling navigation, authentication, and user roles.
@@ -23,6 +23,7 @@ export class NavbarComponent implements OnInit {
   userRole: string | null = null; // Stores the user role.
   canAddProduct: boolean = false; // Determines if the user can add a product.
   canAccessDashboard: boolean = false; // Determines if the user can access the dashboard.
+  showSearchBar: boolean = true; // Nouvelle propriété pour contrôler l'affichage de la barre de recherche
 
   /**
    * @brief Constructor for NavbarComponent.
@@ -32,7 +33,12 @@ export class NavbarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     public router: Router
-  ) { }
+  ) {
+    // S'abonner aux changements d'URL pour mettre à jour l'affichage de la searchbar
+    this.router.events.subscribe(() => {
+      this.updateSearchBarVisibility();
+    });
+  }
 
   /**
    * @brief Toggles the mobile menu state.
@@ -79,6 +85,8 @@ export class NavbarComponent implements OnInit {
    * @details Also retrieves cookies and decodes JWT token for debugging purposes.
    */
   ngOnInit(): void {
+    this.updateSearchBarVisibility(); // Initialiser l'état de la searchbar
+
     this.authService.isAuthenticated().subscribe((status) => {
       this.isAuthenticated = status;
       console.log("🔐 Authentication Status:", status);
@@ -94,5 +102,12 @@ export class NavbarComponent implements OnInit {
     });
 
     this.checkScreenSize();
+  }
+
+  // Nouvelle méthode pour mettre à jour la visibilité de la barre de recherche
+  private updateSearchBarVisibility() {
+    const currentUrl = this.router.url;
+    // Cacher la barre de recherche uniquement sur la page d'accueil
+    this.showSearchBar = currentUrl !== '/home';
   }
 }

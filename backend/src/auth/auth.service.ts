@@ -133,7 +133,7 @@ export class AuthService {
         password: hashedPassword,
         role,
       });
-      
+
       return {
         email: user.email,
         username: user.username,

@@ -33,17 +33,18 @@ body {
   padding: 10px;
   gap: 20px;
   background-color: #023436;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  /* Optimisations pour la fluidité */
+  /* Garder auto pour le comportement mais le style sera défini par les règles globales */
   will-change: transform;
-  /* Indique au navigateur que cet élément va changer, optimisant le rendu */
   -webkit-backface-visibility: hidden;
-  /* Améliore les performances de rendu */
   backface-visibility: hidden;
   transform: translateZ(0);
-  /* Force l'accélération matérielle */
 }
 
 /* Assurer que tous les éléments de l'interface sont au-dessus de l'animation */
@@ -248,43 +249,6 @@ h5 {
   width: 100%;
   height: 100vh;
   transition: background 0.5s ease-in-out;
-}
-
-/* Style général de la scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-  /* Légèrement plus large pour être plus visible */
-  height: 10px;
-  /* Hauteur pour le scroll horizontal */
-}
-
-/* Style du "thumb" (la partie défilable) */
-::-webkit-scrollbar-thumb {
-  background: rgba(45, 208, 150, 0.4);
-  /* Couleur verte légère, assortie au thème */
-  border-radius: 5px;
-  /* Arrondi modéré */
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  /* Bordure légère pour mieux voir la scrollbar */
-}
-
-/* Changement de couleur au survol */
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 208, 150, 0.6);
-  /* Plus visible au survol */
-}
-
-/* Couleur de fond de la scrollbar */
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  /* Fond légèrement visible */
-  border-radius: 5px;
-}
-
-/* Style spécifique pour Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(45, 208, 150, 0.4) rgba(0, 0, 0, 0.05);
 }
 
 /* Amélioration de la fluidité du défilement */
@@ -836,7 +800,7 @@ body {
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  z-index: 100;
+  z-index: 5;
   letter-spacing: 0.5px;
   margin-top: 20px;
 }
@@ -877,4 +841,12 @@ body {
     padding: 15px;
     gap: 15px;
   }
+}
+
+/* Styles pour le composant home */
+.home-component {
+  display: block;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
 }

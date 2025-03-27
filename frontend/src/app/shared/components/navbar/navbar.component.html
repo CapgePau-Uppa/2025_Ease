@@ -7,7 +7,7 @@
       <img class="easelogo" src="vrailogo.png" alt="Logo">
     </picture>
   </div>
-  <app-searchbar class="app-searchbar"></app-searchbar>
+  <app-searchbar *ngIf="showSearchBar" class="app-searchbar"></app-searchbar>
 
   <ul [class.active]="menuOpen">
     <li>

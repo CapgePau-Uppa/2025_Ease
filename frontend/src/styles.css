@@ -20,6 +20,51 @@ html {
     width: 100%;
 }
 
+/* Styles globaux pour les scrollbars - Application forcée */
+html,
+body,
+.container,
+* {
+    scrollbar-width: thin !important;
+    scrollbar-color: #34db6c #f1f1f1 !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.container::-webkit-scrollbar,
+*::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.container::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 10px !important;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.container::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+    background: #34db6c !important;
+    border-radius: 10px !important;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.container::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+    background: #2dd096 !important;
+}
+
+/* Style pour Firefox - Application forcée */
+* {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(45, 208, 150, 0.4) rgba(0, 0, 0, 0.05) !important;
+}
+
 /* Style pour l'autocomplétion des formulaires - Règle globale */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

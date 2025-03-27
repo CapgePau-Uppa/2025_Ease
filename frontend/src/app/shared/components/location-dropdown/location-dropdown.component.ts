@@ -2,12 +2,13 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ApiService } from '../../../../../services/api.service'; // ajustez le chemin si nécessaire
+import { ApiService } from '../../../../services/api.service';
 
 @Component({
   selector: 'app-location-dropdown',
   standalone: true,
   imports: [FormsModule, CommonModule],
+  providers: [ApiService],
   templateUrl: './location-dropdown.component.html',
   styleUrls: ['./location-dropdown.component.css']
 })
@@ -21,7 +22,7 @@ export class LocationDropdownComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Récupère les localisations récentes depuis le localStorage au démarrage
@@ -56,15 +57,14 @@ export class LocationDropdownComponent implements OnInit {
       this.isLoading = true;
       this.apiService.getProductsAround(this.userLocation)
         .subscribe({
-          next: (response) => {
+          next: (response: any[]) => {
             this.isLoading = false;
-            // Navigation vers la page de résultats avec les données reçues
             this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
               this.router.navigate(['/searched-prod'], { state: { resultsArray: response } });
             });
             this.locationSelected.emit(this.userLocation);
           },
-          error: (error) => {
+          error: (error: Error) => {
             console.error('Erreur lors de la récupération des produits:', error);
             this.isLoading = false;
           }

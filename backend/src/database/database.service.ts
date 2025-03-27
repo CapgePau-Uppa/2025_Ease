@@ -1090,20 +1090,20 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    */
   async getProductByLocation(location: string): Promise<any[]> {
     const lowercaseLocation = location.toLowerCase();
-   
+
     const query = `
       SELECT META(p).id AS id, p.*
       FROM \`${this.productsBucket.name}\`._default._default p
       WHERE LOWER(p.origin) = $location;
     `;
-   
+
     const result = await this.executeQuery(query, { location: lowercaseLocation });
-   
+
     if (result.length === 0) {
       console.log(`No products found for location: ${location}`);
       return [];
     }
-   
+
     // Add default "source" field for products without one
     return result.map(product => {
       if (!product.source) {
@@ -1406,7 +1406,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async deleteEntity(type: string, entityId: string): Promise<any> {
     if (!entityId) {
       throw new BadRequestException(`❌ Invalid parameters: ${type} ID is required.`);
-    }  
+    }
     // Determine which entity type to delete
     switch (type) {
       case 'product':
@@ -1414,22 +1414,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       case 'brand':
         try {
           // First get the brand to access its name
-          const brand = await this.getBrandById(entityId); 
+          const brand = await this.getBrandById(entityId);
           if (!brand) {
             console.warn(`⚠️ Brand with ID '${entityId}' not found. Nothing to delete.`);
             return { message: `Brand with ID '${entityId}' does not exist or was already deleted.` };
           }
-          
+
           const brandName = brand.name;
           // Get all products associated with this brand name
-          const productsByBrand = await this.getProductsByBrand(brandName);         
-          if (productsByBrand.length > 0) {            
+          const productsByBrand = await this.getProductsByBrand(brandName);
+          if (productsByBrand.length > 0) {
             // Update each product's status to 'edit-product'
             let updatedCount = 0;
             for (const product of productsByBrand) {
               // Use the productId field
               const productId = product.productId;
-              
+
               if (!productId) {
                 console.error(`❌ Missing productId for product:`, product);
                 continue;
@@ -1444,9 +1444,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           } else {
             console.warn(`ℹNo products found associated with brand "${brandName}"`);
           }
-          
+
           // Now delete the brand
-          return this.deleteBrand(entityId); 
+          return this.deleteBrand(entityId);
         } catch (error) {
           console.error(`❌ Error deleting brand: ${error.message}`, error);
           throw error;

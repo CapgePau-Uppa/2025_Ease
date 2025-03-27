@@ -83,14 +83,16 @@
   background-color: #f9ebde;
   gap: 10px;
   padding: 15px;
-  padding-bottom: 70px; /* Espace réservé pour le bouton like */
+  padding-bottom: 70px;
+  /* Espace réservé pour le bouton like */
   border-radius: 20px;
   cursor: pointer;
   transition: transform 0.3s ease-in-out;
   max-height: 300px;
   overflow: hidden;
   z-index: 999;
-  position: relative; /* Pour que le like-btn en absolu se positionne par rapport à cette carte */
+  position: relative;
+  /* Pour que le like-btn en absolu se positionne par rapport à cette carte */
 }
 
 .item:hover {
@@ -113,40 +115,14 @@
   box-sizing: border-box;
   flex-shrink: 0;
 }
+
 /* === product Description === */
 .product-description {
-  height: 80px;
+  max-height: 100px;
   overflow-y: auto;
-  padding-right: 5px;
-  /* Pour Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: #3498db #f1f1f1;
+  margin-top: 10px;
+  padding-right: 10px;
 }
-.product-description::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-/* Pour Chrome, Edge, Safari */
-.product-description::-webkit-scrollbar {
-  width: 5px; /* plus fine */
-}
-
-.product-description::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 5px;
-}
-
-.product-description::-webkit-scrollbar-thumb {
-  background: #34db6c;
-  border-radius: 25px;
-}
-
-.product-description::-webkit-scrollbar-thumb:hover {
-  background: #2980b9;
-}
-
 
 /* === Product Image === */
 .product-image {
@@ -165,7 +141,7 @@
 
 .like-btn {
   position: absolute;
-  
+
   bottom: 15px;
   right: 15px;
   z-index: 1000;
@@ -176,12 +152,12 @@
   .item {
     flex-direction: column;
   }
-  
+
   .img-container {
     width: 100%;
     height: auto;
   }
-  
+
   .product-image {
     width: 100%;
     height: auto;

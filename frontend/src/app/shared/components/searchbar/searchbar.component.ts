@@ -18,12 +18,12 @@ import { Subject, of, forkJoin } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, tap, filter, first } from 'rxjs/operators';
 import { Router } from '@angular/router';
 // API
-import { ApiService } from '../../../../../services/api.service';
-import { UsersService } from '../../../../../services/users/users.service';
-import { ApiOpenFoodFacts } from '../../../../../services/openFoodFacts/openFoodFacts.service';
+import { ApiService } from '../../../../services/api.service';
+import { UsersService } from '../../../../services/users/users.service';
+import { ApiOpenFoodFacts } from '../../../../services/openFoodFacts/openFoodFacts.service';
 // Cache API
-import { DataCacheService } from '../../../../../services/cache/data-cache.service';
-// Import du composant de localisation (assurez-vous que le chemin est correct)
+import { DataCacheService } from '../../../../services/cache/data-cache.service';
+// Import du composant de localisation
 import { LocationDropdownComponent } from '../location-dropdown/location-dropdown.component';
 
 @Component({
@@ -43,7 +43,7 @@ export class SearchbarComponent implements OnInit {
   wholeSelectedProduct: any;
   isFilterPanelOpen: boolean = false;
   canAddProduct: boolean = false;
-  
+
   // Filtres
   countries: string[] = [];
   selectedCountry: string = '';
@@ -52,7 +52,7 @@ export class SearchbarComponent implements OnInit {
   categories: any[] = [];
   selectedBrand: string = '';
   brands: any[] = [];
-  
+
   // Filtre Prix
   priceFilter: boolean = false;
   minPrice: number = 0;
@@ -61,18 +61,18 @@ export class SearchbarComponent implements OnInit {
   minPriceRange: number = 0;
   maxPriceRange: number = 5000;
   stepPrice: number = 10;
-  
+
   // Recherche & cache
   private _searchSubject = new Subject<string>();
   private _cache = new Map<string, { data: any[]; timestamp: number }>();
   private CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-  
+
   // Dropdowns
   filterDropdownOpen: boolean = false;
-  locationDropdownOpen: boolean = false; // Contrôle l'affichage du composant de localisation
-  
+  locationDropdownOpen: boolean = false;
+
   isLoading: boolean = false;
-  
+
   @Output() searchExecuted = new EventEmitter<void>();
 
   constructor(
@@ -97,7 +97,7 @@ export class SearchbarComponent implements OnInit {
               description: result.fields?.description || 'No description available',
             }));
             this.fullSearchResults = fullResults;
-            this.searchResults = fullResults.slice(0, 5);
+            this.searchResults = fullResults.slice(0, 3);
             this.noResultsMessage = this.searchResults.length ? '' : 'No product found.';
             return of(null);
           }
@@ -140,7 +140,7 @@ export class SearchbarComponent implements OnInit {
               })),
             ];
             this.fullSearchResults = combinedResults;
-            this.searchResults = combinedResults.slice(0, 5);
+            this.searchResults = combinedResults.slice(0, 3);
             this.noResultsMessage = this.searchResults.length ? '' : 'No product found.';
           }
         },
@@ -166,15 +166,15 @@ export class SearchbarComponent implements OnInit {
       console.log("🔄 Auto-refreshing brands...");
       this.dataCacheService.refreshBrands();
     }, 10 * 60 * 1000);
-  
+
     const userRole = this.usersService.getUserRole();
     this.canAddProduct = userRole?.toLowerCase() === 'user' || userRole?.toLowerCase() === 'admin';
   }
-  
+
   get hasSuggestions(): boolean {
     return this.searchResults.length > 0;
   }
-  
+
   onInputChange(event: any) {
     if (this.searchQuery.trim() === '') {
       this.clearSearch();
@@ -182,7 +182,7 @@ export class SearchbarComponent implements OnInit {
     }
     this._searchSubject.next(this.searchQuery);
   }
-  
+
   onEnter(event: any) {
     event as KeyboardEvent;
     if (this.searchQuery.trim() !== '' && event.key === 'Enter') {
@@ -199,13 +199,13 @@ export class SearchbarComponent implements OnInit {
       }
     }
   }
-  
+
   clearSearch() {
     this.searchQuery = '';
     this.searchResults = [];
     this.noResultsMessage = '';
   }
-  
+
   selectProduct(product: any) {
     this.searchQuery = product.name;
     this.selectedProduct = product.id;
@@ -213,7 +213,7 @@ export class SearchbarComponent implements OnInit {
     this.noResultsMessage = '';
     this.searchResults = [];
   }
-  
+
   search(includeSelectedProduct: boolean = false): void {
     this.applyFilters();
     if (!includeSelectedProduct && !Object.keys(this.appliedFilters).length) {
@@ -240,7 +240,7 @@ export class SearchbarComponent implements OnInit {
       error: (error) => console.error('❌ Search error:', error),
     });
   }
-  
+
   private reorderResults(results: any[], searchedProductId: string): any[] {
     if (!results || results.length === 0) return results;
     const index = results.findIndex(product => product.id === searchedProductId);
@@ -250,23 +250,23 @@ export class SearchbarComponent implements OnInit {
     }
     return results;
   }
-  
+
   // ======================== FILTER FUNCTIONS
-  
+
   onCountryChange() {
     // Optionnel: récupérez les départements en fonction du pays sélectionné.
   }
-  
+
   updateMinPrice() {
     if (this.minPrice < this.minPriceRange) this.minPrice = this.minPriceRange;
     if (this.minPrice > this.maxPrice) this.maxPrice = this.minPrice;
   }
-  
+
   updateMaxPrice() {
     if (this.maxPrice > this.maxPriceRange) this.maxPrice = this.maxPriceRange;
     if (this.maxPrice < this.minPrice) this.minPrice = this.maxPrice;
   }
-  
+
   applyFilters() {
     const filters = {
       country: this.selectedCountry || null,
@@ -279,17 +279,23 @@ export class SearchbarComponent implements OnInit {
       Object.entries(filters).filter(([_, value]) => value !== null && value !== '')
     );
   }
-  
+
   // ======================== DROPDOWN TOGGLING
-  
-  toggleFilterDropdown() {
+
+  toggleFilterDropdown(): void {
     this.filterDropdownOpen = !this.filterDropdownOpen;
+    if (this.filterDropdownOpen) {
+      this.locationDropdownOpen = false;
+    }
   }
-  
-  toggleLocationDropdown() {
+
+  toggleLocationDropdown(): void {
     this.locationDropdownOpen = !this.locationDropdownOpen;
+    if (this.locationDropdownOpen) {
+      this.filterDropdownOpen = false;
+    }
   }
-  
+
   handleLocationSelection(selectedLocation: string): void {
     console.log('Location selected:', selectedLocation);
     // Vous pouvez déclencher ici une recherche par localisation ou mettre à jour l'état

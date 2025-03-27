@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NavbarComponent } from '../shared/components/navbar/navbar.component';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NavbarComponent } from '../searched-prod/comp/navbar/navbar.component';
 
 interface ContactForm {
   name: string;

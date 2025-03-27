@@ -6,7 +6,7 @@
 /* Reset margins and paddings for all elements */
 *,
 ::before,
-::after{
+::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -17,13 +17,14 @@
  * @brief Main container of the component.
  * It arranges elements in a column and centers them.
  */
-.container{
+.container {
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
     height: fit-content;
-    background-color: #023436;  
+    background-color: #023436;
+    padding: 10px;
 }
 
 
@@ -31,8 +32,7 @@
 /**
  * @brief Styles for the navigation bar inside the component.
  */
-.app-navbar, .app-form{
+.app-navbar,
+.app-form {
     width: 100%;
 }
-
-

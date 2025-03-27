@@ -2,8 +2,8 @@ import { Component, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@ang
 import * as VANTA from 'vanta/src/vanta.birds';
 import * as THREE from 'three';
 // Component
-import { SearchbarComponent } from './comp/searchbar/searchbar.component';
-import { NavbarComponent } from './comp/navbar/navbar.component';
+import { SearchbarComponent } from '../../shared/components/searchbar/searchbar.component';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -23,7 +23,10 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [SearchbarComponent, NavbarComponent, CommonModule],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
+  host: {
+    'class': 'home-component'
+  }
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
   @ViewChild('vantaBackground') vantaBackground!: ElementRef;

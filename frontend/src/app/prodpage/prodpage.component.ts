@@ -10,7 +10,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { NavbarComponent } from '../searched-prod/comp/navbar/navbar.component';
+import { NavbarComponent } from '../shared/components/navbar/navbar.component';
 // API
 import { ApiService } from '../../services/api.service';
 import { APIUnsplash } from '../../services/unsplash/unsplash.service';

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavbarComponent } from '../searched-prod/comp/navbar/navbar.component';
+import { NavbarComponent } from '../shared/components/navbar/navbar.component';
 import { UsercompComponent } from './usercomp/usercomp.component';
 
 @Component({
