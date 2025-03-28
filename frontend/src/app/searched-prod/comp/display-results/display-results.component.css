@@ -9,8 +9,7 @@
 }
 
 .grid-btn button {
-  background-color: #ccc;
-  /* Couleur par défaut */
+  background-color: #ccc; /* Couleur par défaut */
   border: none;
   outline: none;
   padding: 10px;
@@ -21,8 +20,7 @@
 }
 
 .grid-btn button.active {
-  background-color: #3498db;
-  /* Couleur pour le bouton actif */
+  background-color: #3498db; /* Couleur pour le bouton actif */
   color: white;
 }
 
@@ -83,7 +81,7 @@
   background-color: #f9ebde;
   gap: 10px;
   padding: 15px;
-  padding-bottom: 70px; /* Espace réservé pour le bouton like */
+  padding-bottom: 70px; /* Espace réservé pour le bouton like en mode grille */
   border-radius: 20px;
   cursor: pointer;
   transition: transform 0.3s ease-in-out;
@@ -113,7 +111,8 @@
   box-sizing: border-box;
   flex-shrink: 0;
 }
-/* === product Description === */
+
+/* === Product Description === */
 .product-description {
   height: 80px;
   overflow-y: auto;
@@ -147,7 +146,6 @@
   background: #2980b9;
 }
 
-
 /* === Product Image === */
 .product-image {
   width: 100%;
@@ -162,10 +160,8 @@
 }
 
 /* Positionnement du bouton "like" en bas à droite */
-
 .like-btn {
   position: absolute;
-  
   bottom: 15px;
   right: 15px;
   z-index: 1000;
@@ -186,4 +182,16 @@
     width: 100%;
     height: auto;
   }
+}
+
+/* === Corrections pour le mode liste === */
+/* Réduit l'espace en bas pour avoir le même écart en haut et en bas */
+.items-list.list .item {
+  padding-bottom: 15px;
+}
+
+/* Réduit la taille de la box image en mode liste */
+.items-list.list .img-container {
+  width: 150px;
+  height: 150px;
 }
