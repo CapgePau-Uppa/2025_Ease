@@ -1,41 +1,36 @@
 <nav class="navbar">
   <div class="logo" routerLink="/home">
-    <picture>
-      <!-- Below 700px, we use ours.png -->
-      <source media="(max-width: 700px)" srcset="ours.png">
-      <!-- Otherwise, use vrailogo.png (default fallback) -->
-      <img class="easelogo" src="vrailogo.png" alt="Logo">
-    </picture>
+    <img class="easelogo" src="vrailogo.png" alt="Logo">
   </div>
-  <app-searchbar *ngIf="showSearchBar" class="app-searchbar"></app-searchbar>
 
   <ul [class.active]="menuOpen">
+
     <li>
       <a class="nav-btn" routerLink="/home">
-        <i class="fas fa-home"></i> Accueil
+        <i class="fa-solid fa-house"></i>Accueil
       </a>
     </li>
     <li>
       <a class="nav-btn" routerLink="/category">
-        <i class="fas fa-tags"></i> Catégories
+        <i class="fa-solid fa-tags"></i>Catégories
       </a>
     </li>
     <li>
       <a class="nav-btn" routerLink="/add-product" *ngIf="canAddProduct">
-        <i class="fas fa-plus"></i> Add Product
+        <i class="fa-solid fa-plus"></i>Add Product
       </a>
     </li>
     <li>
       <a class="nav-btn" routerLink="/contact">
-        <i class="fas fa-envelope"></i> Contact
+        <i class="fa-solid fa-phone"></i>Contact
       </a>
     </li>
     <li class="user">
       <div class="log-container">
         <ng-container class="log-info" *ngIf="isAuthenticated; else loginTemplate">
-          <!--Profile image that opens the drop-down menu -->
+          <!--Image de profil qui ouvre le menu déroulant -->
           <img class="userprofile" src="rhinoceros.png" alt="Profile" (click)="toggleDropdown()">
-          <!-- drop-down menu -->
+          <!-- Menu déroulant -->
           <div *ngIf="showDropdown || isMobile" class="dropdown-menu">
             <span routerLink="/user-profile" class="user-btn profile-btn"><i class="fa-solid fa-user"></i>Profile</span>
             <span *ngIf="userRole === 'Admin' || userRole === 'SuperAdmin'" routerLink="/admin"
@@ -47,7 +42,7 @@
         </ng-container>
 
         <ng-template #loginTemplate>
-          <a class="nav-btn login-btn" routerLink="/auth"><i class="fas fa-sign-in-alt"></i> Login</a>
+          <a class="nav-btn" routerLink="/auth" class="nav-btn login-btn">Login</a>
         </ng-template>
       </div>
     </li>

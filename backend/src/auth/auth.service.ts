@@ -17,6 +17,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { UserRole } from "./enums/roles.enum";
 import { LoginDto } from "./dto/login.dto";
+import { AddressDto } from "./dto/auth.dto";
 
 /**
  * @brief Service responsible for authentication operations.
@@ -58,13 +59,10 @@ export class AuthService {
       throw new UnauthorizedException("Invalid password");
     }
 
-    console.log('user :', user);
-
-    console.log('user :', user);
-
     return {
       email: user.email,
       username: user.username,
+      address: user.address,
       role: user.role,
     };
   }
@@ -92,6 +90,7 @@ export class AuthService {
           email: user.email,
           role: user.role,
           username: user.username,
+          address: user.address,
         },
       };
     } catch (error) {
@@ -108,6 +107,7 @@ export class AuthService {
    * @param {string} username - The username of the new user.
    * @param {string} email - The email of the new user.
    * @param {string} password - The password of the new user.
+   * @param {string} address - The address for the new account (only post code, city and country)
    * @param {UserRole} role - The role of the new user, defaults to USER.
    * @returns {Promise<any>} The created user object without the password.
    * @throws {InternalServerErrorException} If an error occurs during user creation.
@@ -116,21 +116,17 @@ export class AuthService {
     username: string,
     email: string,
     password: string,
+    address: AddressDto,
     role: UserRole = UserRole.USER,
   ) {
-    console.log("📝 Registering a new user:", {
-      username,
-      email,
-      role,
-    });
-
+    // Create an hashed password and register with it
     const hashedPassword = await bcrypt.hash(password, 10);
-
     try {
       const user = await this.usersService.createUser({
         username,
         email,
         password: hashedPassword,
+        address,
         role,
       });
 
@@ -138,6 +134,7 @@ export class AuthService {
         email: user.email,
         username: user.username,
         role: user.role,
+        address: user.address,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       };
@@ -164,4 +161,23 @@ export class AuthService {
       throw new InternalServerErrorException("Error retrieving users list.");
     }
   }
+
+  /**
+   * @brief Retrieves a user from the database by email.
+   * @details This method allows fetching a specific user's details by their email address.
+   *          It is intended for use by authorized users (such as admins) and returns the user data.
+   * 
+   * @param email The email address of the user to be retrieved.
+   * @returns {Promise<any>} A promise that resolves to the user data if found.
+   * @throws {InternalServerErrorException} If an error occurs while retrieving the user data.
+   */
+  async findUserByEmail(email: string): Promise<any> {
+    try {
+      return await this.usersService.findByEmail(email);
+    } catch (error) {
+      console.error("❌ Error retrieving users:", error);
+      throw new InternalServerErrorException("Error retrieving users list.");
+    }
+  }
+
 }

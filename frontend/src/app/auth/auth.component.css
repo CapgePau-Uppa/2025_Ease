@@ -91,36 +91,8 @@ form {
 }
 
 /* Animation pour la barre d'erreur */
-@keyframes errorPulse {
-  0% {
-    transform: scaleX(1);
-    opacity: 0.8;
-  }
 
-  50% {
-    transform: scaleX(1.02);
-    opacity: 1;
-  }
 
-  100% {
-    transform: scaleX(1);
-    opacity: 0.8;
-  }
-}
-
-@keyframes validGlow {
-  0% {
-    box-shadow: 0 0 0px rgba(56, 211, 159, 0);
-  }
-
-  50% {
-    box-shadow: 0 2px 4px rgba(56, 211, 159, 0.5);
-  }
-
-  100% {
-    box-shadow: 0 0 0px rgba(56, 211, 159, 0);
-  }
-}
 
 /* Conteneurs des champs */
 .input-container {
@@ -132,7 +104,6 @@ form {
   border-bottom: 2px solid #38d39f;
   transition: border-color 0.4s ease, box-shadow 0.4s ease;
   margin-bottom: 35px;
-  animation: validGlow 3s infinite;
 }
 
 .icon-log {
@@ -200,7 +171,6 @@ h5 {
   border-bottom: 2px solid #ff4444;
   animation: errorPulse 2s infinite;
   transition: all 0.3s ease-in-out;
-  box-shadow: 0 2px 5px rgba(255, 68, 68, 0.3);
 }
 
 .input-container.error-input:before,
@@ -607,4 +577,102 @@ a:hover {
 .dark-mode .input-log:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #2c3e50 inset !important;
   -webkit-text-fill-color: #fff !important;
+}
+
+/* Enhanced autocomplete styling with white background */
+.autocomplete-results {
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  padding: 5px 0;
+  
+  /* Position below the entire input container instead of just the input field */
+  top: 100%;
+  left: 0;
+  margin-top: 10px;
+}
+
+.autocomplete-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  border-left: 3px solid transparent;
+  color: #333;
+}
+
+.autocomplete-item:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.autocomplete-item:hover {
+  background-color: #f5f5f5;
+  border-left-color: #4caf50;
+}
+
+.autocomplete-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Animation for showing suggestions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.autocomplete-results {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Add address icon to suggestion items */
+.autocomplete-item::before {
+  content: '\f3c5'; /* Font Awesome map marker icon */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  margin-right: 10px;
+  color: #4caf50;
+  font-size: 0.9em;
+}
+
+/* Scrollbar styling for suggestions list */
+.autocomplete-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.autocomplete-results::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 0 8px 8px 0;
+}
+
+.autocomplete-results::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.autocomplete-results::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Media query for responsive adjustments */
+@media (max-width: 768px) {
+  .autocomplete-results {
+    max-height: 180px;
+    /* For small screens, always position below */
+    left: 0;
+    top: 100%;
+    width: 100%;
+  }
+  
+  .autocomplete-item {
+    padding: 10px 12px;
+  }
 }

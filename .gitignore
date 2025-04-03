@@ -1,6 +1,7 @@
 # Environments files
 /.env.development
 /.env.production
+/.env.docker
 /frontend/src/environments/*
 
 # Do not ignore example .env
@@ -12,6 +13,10 @@
 /noteRU.txt
 /.vscode
 /.history
+/bucketsJSON/exportedBucketsData/*
 
 #node_modules
 node_modules
+
+# Logs
+/logs

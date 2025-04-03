@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
   private readonly CHECK_INTERVAL = 30000; // 30 secondes entre chaque vérification
 
   // Liste des routes publiques
-  private publicRoutes: string[] = ['/home', '/category', '/contact', '/login', '/searched-prod'];
+  private publicRoutes: string[] = ['/home', '/category', '/contact', '/auth', '/login', '/register', '/searched-prod'];
 
   constructor(
     private authService: AuthService,
@@ -120,7 +120,7 @@ export class AuthGuard implements CanActivate {
                 this.notificationService.showWarning(
                   'Veuillez vous connecter pour accéder à cette page'
                 );
-                this.router.navigate(['/login']);
+                this.router.navigate(['/auth']);
               }
               return of(isPublicRoute);
             }
@@ -131,7 +131,7 @@ export class AuthGuard implements CanActivate {
               this.notificationService.showWarning(
                 'Votre session a expiré. Veuillez vous reconnecter.'
               );
-              this.router.navigate(['/login']);
+              this.router.navigate(['/auth']);
               return of(false);
             }
 

@@ -30,7 +30,7 @@ export class UsersService {
    * @brief Constructor injecting required services.
    * @param cookieService Service used to read cookies (specifically the `access_token` cookie).
    */
-  constructor(private cookieService: CookieService) {}
+  constructor(private cookieService: CookieService) { }
 
   /**
    * @brief Retrieves the user's role from the JWT stored in cookies.
@@ -150,8 +150,10 @@ export class UsersService {
   }
 
   shouldRedirectToLogin(): boolean {
-    // Ne pas rediriger si on est déjà sur la page de login
-    if (window.location.pathname.includes('/login')) {
+    // Ne pas rediriger si on est déjà sur la page de login ou auth
+    if (window.location.pathname.includes('/login') ||
+      window.location.pathname.includes('/auth') ||
+      window.location.pathname.includes('/register')) {
       return false;
     }
 

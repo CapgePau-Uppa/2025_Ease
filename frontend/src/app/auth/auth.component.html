@@ -1,11 +1,10 @@
 <body [class.dark-mode]="isDarkMode">
-
   <img class="wave" [src]="isDarkMode ? 'wavedark.png' : 'wave.png'" />
   <img class="wavetop" [src]="isDarkMode ? 'wavetopdark.png' : 'wavetop.png'" />
 
-  <!-- Bouton de retour à l'accueil -->
+  <!-- Button to go back to the homepage -->
   <button class="back-btn" (click)="navigateToHome()">
-    <i class="fas fa-arrow-left"></i> Accueil
+    <i class="fas fa-arrow-left"></i> Page principale
   </button>
 
   <div class="container">
@@ -14,67 +13,166 @@
         <img src="ours.png" />
       </div>
       <div class="switch-container">
-        <button type="button" class="switch-button" [class.active]="isLoginMode" (click)="setLoginMode(true)">
-          Login
+        <button
+          type="button"
+          class="switch-button"
+          [class.active]="isLoginMode"
+          (click)="setLoginMode(true)"
+        >
+          Connexion
         </button>
-        <button type="button" class="switch-button" [class.active]="!isLoginMode" (click)="setLoginMode(false)">
-          Register
+        <button
+          type="button"
+          class="switch-button"
+          [class.active]="!isLoginMode"
+          (click)="setLoginMode(false)"
+        >
+          Créer un compte
         </button>
       </div>
       <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
-        <!-- Champ Username Login -->
-        <div class="input-container name" *ngIf="isLoginMode" [class.error-input]="!isUsernameValid">
+        <!-- Username field for Login -->
+        <div
+          class="input-container name"
+          *ngIf="isLoginMode"
+          [class.error-input]="!isUsernameValid"
+        >
           <div class="icon-log">
             <i class="fas fa-user"></i>
           </div>
           <div class="data">
             <h5>Email</h5>
-            <input #usernameInput type="text" class="input-log" name="usernameLogin" [(ngModel)]="username" required>
+            <input
+              #usernameInput
+              type="text"
+              class="input-log"
+              name="usernameLogin"
+              [(ngModel)]="username"
+              required
+            />
           </div>
         </div>
         <div class="simple-error" *ngIf="usernameError && isLoginMode">
           <i class="fas fa-exclamation-circle"></i> {{ usernameError }}
         </div>
 
-        <!-- Champ Username Register -->
-        <div class="input-container" *ngIf="!isLoginMode" [class.error-input]="!isUsernameValid">
+        <!-- Username field for Register -->
+        <div
+          class="input-container"
+          *ngIf="!isLoginMode"
+          [class.error-input]="!isUsernameValid"
+        >
           <div class="icon-log">
             <i class="fas fa-user"></i>
           </div>
           <div class="data">
-            <h5>Username</h5>
-            <input #usernameInput type="text" class="input-log" name="username" [(ngModel)]="username" required />
+            <h5>Nom d'utilisateur</h5>
+            <input
+              #usernameInput
+              type="text"
+              class="input-log"
+              name="username"
+              [(ngModel)]="username"
+              required
+            />
           </div>
         </div>
         <div class="simple-error" *ngIf="usernameError && !isLoginMode">
           <i class="fas fa-exclamation-circle"></i> {{ usernameError }}
         </div>
 
-        <!-- Champ Email uniquement pour l'inscription -->
-        <div class="input-container" *ngIf="!isLoginMode" [class.error-input]="!isEmailValid">
+        <!-- Address field only for registration with autocomplete -->
+        <div
+          class="input-container"
+          *ngIf="!isLoginMode"
+          [class.error-input]="!isAddressValid"
+        >
+          <div class="icon-log">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <div class="data">
+            <h5>Localisation(Pays, ville/Code postal)</h5>
+            <input
+              #addressInput
+              type="text"
+              class="input-log"
+              name="address"
+              [(ngModel)]="address"
+              required
+              (input)="onAddressInput($event)"
+            />
+
+            <!-- Address suggestions list -->
+            <div
+              class="autocomplete-results"
+              *ngIf="addressSuggestions.length > 0"
+            >
+              <div
+                class="autocomplete-item"
+                *ngFor="let suggestion of addressSuggestions"
+                (click)="selectAddress(suggestion)"
+                (mousedown)="$event.preventDefault()"
+              >
+                <span>{{ formatSuggestionDisplay(suggestion) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="simple-error" *ngIf="addressError">
+          <i class="fas fa-exclamation-circle"></i> {{ addressError }}
+        </div>
+
+        <!-- Email field only for registration -->
+        <div
+          class="input-container"
+          *ngIf="!isLoginMode"
+          [class.error-input]="!isEmailValid"
+        >
           <div class="icon-log">
             <i class="fas fa-envelope"></i>
           </div>
           <div class="data">
             <h5>Email</h5>
-            <input #emailInput type="email" class="input-log" name="email" [(ngModel)]="email" required email />
+            <input
+              #emailInput
+              type="email"
+              class="input-log"
+              name="email"
+              [(ngModel)]="email"
+              required
+              email
+            />
           </div>
         </div>
         <div class="simple-error" *ngIf="emailError">
           <i class="fas fa-exclamation-circle"></i> {{ emailError }}
         </div>
 
-        <!-- Champ Password avec icône d'œil -->
-        <div class="input-container pass" [class.error-input]="!isPasswordValid">
+        <!-- Password field with eye icon -->
+        <div
+          class="input-container pass"
+          [class.error-input]="!isPasswordValid"
+        >
           <div class="icon-log">
             <i class="fas fa-lock"></i>
           </div>
           <div class="data">
-            <h5>Password</h5>
-            <input #passwordInput [attr.type]="showPassword ? 'text' : 'password'" class="input-log" name="password"
-              [(ngModel)]="password" required minlength="6" />
+            <h5>Mot de passe</h5>
+            <input
+              #passwordInput
+              [attr.type]="showPassword ? 'text' : 'password'"
+              class="input-log"
+              name="password"
+              [(ngModel)]="password"
+              required
+              minlength="6"
+            />
             <span class="eye-icon" (click)="togglePasswordVisibility()">
-              <i class="fas eyes" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"></i>
+              <i
+                class="fas eyes"
+                [class.fa-eye]="showPassword"
+                [class.fa-eye-slash]="!showPassword"
+              ></i>
             </span>
           </div>
         </div>
@@ -82,8 +180,14 @@
           <i class="fas fa-exclamation-circle"></i> {{ passwordError }}
         </div>
 
-        <a href="#" *ngIf="isLoginMode" class="forgot-password">Forgot Password?</a>
-        <input type="submit" class="btn" [value]="isLoginMode ? 'LOGIN' : 'REGISTER'" />
+        <a href="#" *ngIf="isLoginMode" class="forgot-password"
+          >Mot de passe oublié?</a
+        >
+        <input
+          type="submit"
+          class="btn"
+          [value]="isLoginMode ? 'Connexion' : 'Créer un compte'"
+        />
       </form>
     </div>
   </div>

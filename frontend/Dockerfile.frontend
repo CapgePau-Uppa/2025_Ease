@@ -1,23 +1,33 @@
-﻿FROM nginx:alpine
+FROM node:18-alpine as build
+WORKDIR /app
+
+# Copier les fichiers de dépendances et de configuration 
+COPY package*.json ./
+COPY angular.json tsconfig*.json ./
+
+# Installer les dépendances
+RUN npm ci
+
+# Copier le reste des fichiers du projet
+COPY src/ ./src/
+COPY nginx.conf ./
+
+# Builder avec la configuration Docker
+RUN npm run build:docker
+
+FROM nginx:alpine
 WORKDIR /usr/share/nginx/html
 
 # Nettoyer le répertoire par défaut de Nginx
 RUN rm -rf ./*
 
-# Copier les fichiers du build déjà existants localement
-COPY dist/browser/ /usr/share/nginx/html/
+# Copier les fichiers du build Docker
+COPY --from=build /app/dist/browser/ .
 
 # Copier la configuration Nginx personnalisée
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Script pour remplacer les variables d'environnement
-RUN apk add --no-cache bash
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-
-# Exposer le port configuré
+# Exposer le port
 EXPOSE 80
 
-# Définir l'entrypoint pour remplacer les variables d'environnement au démarrage
-ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

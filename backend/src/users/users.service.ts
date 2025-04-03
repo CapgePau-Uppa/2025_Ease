@@ -48,6 +48,7 @@ export class UsersService {
         email: user.email,
         username: user.username,
         password: user.password,
+        address: user.address,
         role: user.role,
       };
     } catch (error) {
@@ -63,7 +64,7 @@ export class UsersService {
    * @brief Creates a new user after verifying their existence.
    * @details This method checks if a user already exists before inserting them into the database.
    *
-   * @param {any} user - The user object containing email and password.
+   * @param {any} user - The user object containing email, password and address.
    * @returns {Promise<any>} - The created user object.
    * @throws {InternalServerErrorException} If the user already exists or if an error occurs during creation.
    */
@@ -73,6 +74,7 @@ export class UsersService {
         user.username,
         user.email,
         user.password,
+        user.address,
         user.role
       );
       return result;

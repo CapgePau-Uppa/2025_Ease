@@ -1,28 +1,26 @@
-﻿# Image Node.js de base
+# Image Node.js de base
 FROM node:18-alpine
 
 # Définir le dossier de travail
 WORKDIR /app
 
-# Copier les fichiers package.json et package-lock.json
+# Copier les fichiers de dépendances
 COPY package*.json ./
+COPY tsconfig*.json ./
 
 # Installer les dépendances et NestJS CLI
 RUN npm ci && \
     npm install -g @nestjs/cli
 
-# Copier les fichiers de configuration TypeScript
-COPY tsconfig*.json ./
-
-# Copier les fichiers sources
+# Copier le reste des fichiers du projet
 COPY src/ ./src/
 COPY ssl/ ./ssl/
 
 # Construire l'application (TypeScript -> JavaScript)
 RUN npm run build
 
-# Exposer le port (utilise la variable d'environnement)
-EXPOSE 3000
+# Exposer le port
+EXPOSE 3001
 
 # Utiliser une commande de démarrage qui respecte les variables d'environnement
 CMD ["node", "dist/main"]

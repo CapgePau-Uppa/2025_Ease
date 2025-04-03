@@ -50,9 +50,19 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'login',
+    path: 'auth',
     loadComponent: () =>
       import('./auth/auth.component').then((m) => m.AuthComponent),
+  },
+  {
+    path: 'login',
+    redirectTo: '/auth',
+    pathMatch: 'full',
+  },
+  {
+    path: 'register',
+    redirectTo: '/auth',
+    pathMatch: 'full',
   },
   {
     path: 'contact',

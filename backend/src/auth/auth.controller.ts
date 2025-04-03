@@ -48,7 +48,7 @@ export class AuthController {
    */
   @Post("register")
   async register(@Body() body: RegisterDto): Promise<any> {
-    return this.authService.register(body.username, body.email, body.password);
+    return this.authService.register(body.username, body.email, body.password, body.address);
   }
 
   /**
@@ -67,70 +67,18 @@ export class AuthController {
     @Body() body: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<any> {
-    console.log("📝 Login attempt for:", body.email);
     const result = await this.authService.login(body);
-    console.log("✅ Login successful, setting cookie");
-
-    // Configuration des cookies selon l'environnement
-    const nodeEnv = process.env.NODE_ENV || 'development';
-    console.log(`🔧 Configuration des cookies pour l'environnement: ${nodeEnv}`);
-
-    // Configuration de base des cookies
-    const cookieOptions = {
-      httpOnly: false,
-      secure: false,
-      sameSite: 'lax' as 'strict' | 'lax' | 'none',
+    // Set the cookie with more permissive options for development
+    response.cookie("accessToken", result.access_token, {
+      httpOnly: false, // Temporarily set to false for debugging
+      secure: false, // Temporarily set to false for local development
+      sameSite: "lax",
       path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 24 heures
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      domain: undefined, // Let the browser handle the domain
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
-    };
-
-    // Ajustements spécifiques selon l'environnement
-    switch (nodeEnv) {
-      case 'development':
-        // Tout est en local, configuration la plus permissive
-        console.log('🛠️ Mode développement - Configuration locale');
-        cookieOptions.secure = false;
-        cookieOptions.sameSite = 'lax';
-        break;
-
-      case 'production':
-        // Frontend/Backend en local, BDD en ligne
-        // Comme c'est toujours en localhost, on garde une config permissive
-        console.log('🏭 Mode production - Configuration localhost avec BDD en ligne');
-        cookieOptions.secure = false; // Pas de HTTPS en local
-        cookieOptions.sameSite = 'lax';
-        break;
-
-      case 'deploy':
-        // Tout est déployé (Vercel/Render)
-        console.log('🚀 Mode déploiement - Configuration pour Vercel/Render');
-        cookieOptions.secure = true; // HTTPS obligatoire
-        cookieOptions.sameSite = 'none'; // Pour le cross-domain
-        break;
-
-      default:
-        console.log('⚠️ Mode non reconnu, utilisation de la configuration par défaut');
-    }
-
-    console.log('📝 Configuration finale des cookies:', {
-      httpOnly: cookieOptions.httpOnly,
-      secure: cookieOptions.secure,
-      sameSite: cookieOptions.sameSite,
-      path: cookieOptions.path,
-      env: nodeEnv
     });
 
-    // Définition du cookie principal
-    response.cookie("accessToken", result.access_token, cookieOptions);
-
-    // Cookie de backup avec configuration alternative
-    response.cookie("accessToken_backup", result.access_token, {
-      ...cookieOptions,
-      sameSite: 'lax' // Pour assurer une compatibilité maximale
-    });
-
-    console.log("🔑 Token défini dans les cookies");
     return result;
   }
 
@@ -147,7 +95,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get("profile")
   async getProfile(@Req() req): Promise<any> {
-    return req.user;
+    // Get the full user
+    const fullUser = await this.authService.findUserByEmail(req.user.email);
+    return {
+      email: fullUser.email,
+      role: fullUser.role,
+      username: fullUser.username,
+      address: fullUser.address
+    };
   }
 
   /**

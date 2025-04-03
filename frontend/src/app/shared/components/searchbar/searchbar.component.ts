@@ -29,7 +29,11 @@ import { LocationDropdownComponent } from '../location-dropdown/location-dropdow
 @Component({
   selector: 'app-searchbar',
   standalone: true,
-  imports: [FormsModule, CommonModule, LocationDropdownComponent],
+  imports: [
+    FormsModule,
+    CommonModule,
+    LocationDropdownComponent
+  ],
   templateUrl: './searchbar.component.html',
   styleUrls: ['./searchbar.component.css'],
 })
@@ -84,12 +88,13 @@ export class SearchbarComponent implements OnInit {
   ) {
     this._searchSubject
       .pipe(
-        debounceTime(200),
-        distinctUntilChanged(),
-        filter((query) => query.trim() !== ''),
+        debounceTime(200),        // Debounces input to reduce API calls.
+        distinctUntilChanged(),   // Prevents repeated queries with the same value.
+        filter((query) => query.trim() !== ''), // Ignores empty queries.
         switchMap((query) => {
           const trimmedQuery = query.trim();
           const cachedData = this._cache.get(trimmedQuery);
+          // Use cached data if valid
           if (cachedData && Date.now() - cachedData.timestamp < this.CACHE_DURATION) {
             const fullResults = cachedData.data.map((result: any) => ({
               id: result.id,
@@ -101,7 +106,8 @@ export class SearchbarComponent implements OnInit {
             this.noResultsMessage = this.searchResults.length ? '' : 'No product found.';
             return of(null);
           }
-          this.isLoading = true;
+          this.isLoading = true;  // Display a loading message
+          // Launch parallel requests: Internal API + Open Food Facts
           return forkJoin({
             internalResults: this.apiService.sendSearchData({ search: trimmedQuery }),
             offResults: this.apiOFF.getProductInfo(trimmedQuery),
@@ -110,7 +116,7 @@ export class SearchbarComponent implements OnInit {
               this.isLoading = false;
               const combinedResults = [
                 ...(internalResults || []),
-                ...(offResults?.products || []),
+                ...(offResults?.products || []),  // Include Open Food Facts products.
               ];
               if (combinedResults.length) {
                 this._cache.set(trimmedQuery, { data: [...combinedResults], timestamp: Date.now() });
@@ -120,11 +126,18 @@ export class SearchbarComponent implements OnInit {
         })
       )
       .subscribe({
+        /**
+         * @brief Processes the results from both APIs and merges them.
+         *
+         * @param response Object containing results from internal and external APIs.
+         * @returns {void}
+         */
         next: (response: any) => {
           this.isLoading = false;
           if (response) {
             const internalResults = response.internalResults || [];
             const offResults = response.offResults?.products || [];
+            // Merge results with a source identifier
             const combinedResults = [
               ...internalResults.map((result: any) => ({
                 id: result.id,
@@ -151,8 +164,14 @@ export class SearchbarComponent implements OnInit {
       });
   }
 
+  /**
+   * @brief Initializes the component and loads necessary data.
+   * @details This method loads the countries, categories, and brands from the cache service and sets up periodic refresh of brands.
+   *          It also checks the user role to determine if they are allowed to add products.
+   */
   async ngOnInit(): Promise<void> {
     this.dataCacheService.loadData();
+    // Fetch the data in the localStorage
     forkJoin({
       countries: this.dataCacheService.getCountries().pipe(first()),
       categories: this.dataCacheService.getCategories().pipe(first()),
@@ -162,12 +181,13 @@ export class SearchbarComponent implements OnInit {
       this.categories = categories.map(category => category.name);
       this.brands = brands;
     });
+    // Refresh brands automatically every 10 minutes
     setInterval(() => {
-      console.log("🔄 Auto-refreshing brands...");
       this.dataCacheService.refreshBrands();
     }, 10 * 60 * 1000);
 
     const userRole = this.usersService.getUserRole();
+    // Check if the role allows you to add a product
     this.canAddProduct = userRole?.toLowerCase() === 'user' || userRole?.toLowerCase() === 'admin';
   }
 
@@ -187,14 +207,14 @@ export class SearchbarComponent implements OnInit {
     event as KeyboardEvent;
     if (this.searchQuery.trim() !== '' && event.key === 'Enter') {
       if (this.selectedProduct) {
-        this.search(true);
+        this.search(true);  // Search including the selected product
       } else {
         if (this.fullSearchResults.length > 0) {
           this.router.navigate(['/searched-prod'], {
             state: { resultsArray: this.fullSearchResults },
           });
         } else {
-          this.search(false);
+          this.search(false); // Search without including the selected product
         }
       }
     }
@@ -211,28 +231,36 @@ export class SearchbarComponent implements OnInit {
     this.selectedProduct = product.id;
     this.wholeSelectedProduct = product;
     this.noResultsMessage = '';
-    this.searchResults = [];
+    this.searchResults = []; // Hide suggestions after selection.
   }
 
   search(includeSelectedProduct: boolean = false): void {
-    this.applyFilters();
+    this.applyFilters(); // Apply filters before performing the search.
+    // Warn if no filters or selected product is present
     if (!includeSelectedProduct && !Object.keys(this.appliedFilters).length) {
       console.warn('⚠️ No filters applied.');
       return;
     }
     const filtersToSend = {
-      ...this.appliedFilters,
-      productId: includeSelectedProduct ? this.selectedProduct : null,
-      productSource: this.wholeSelectedProduct ? this.wholeSelectedProduct.source : null,
-      currentRoute: this.router.url,
+      ...this.appliedFilters, // Include all applied filters
+      productId: includeSelectedProduct ? this.selectedProduct : null, // Include selected product ID if required
+      productSource: this.wholeSelectedProduct ? this.wholeSelectedProduct.source : null, // If no id means only the filters
+      currentRoute: this.router.url, // Pass the current route for backend context
     };
+
     this.isLoading = true;
+
+    // Send filters to the API and handle response
     this.apiService.postProductsWithFilters(filtersToSend).subscribe({
       next: (response) => {
         this.isLoading = false;
+
+        // Ensure the selected product is at the first position
         if (includeSelectedProduct && this.selectedProduct) {
           response = this.reorderResults(response, this.selectedProduct);
         }
+
+        // Navigate to results page with the response
         this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
           this.router.navigate(['/searched-prod'], { state: { resultsArray: response } });
         });
@@ -243,6 +271,7 @@ export class SearchbarComponent implements OnInit {
 
   private reorderResults(results: any[], searchedProductId: string): any[] {
     if (!results || results.length === 0) return results;
+
     const index = results.findIndex(product => product.id === searchedProductId);
     if (index > 0) {
       const [searchedProduct] = results.splice(index, 1);
@@ -251,10 +280,11 @@ export class SearchbarComponent implements OnInit {
     return results;
   }
 
+
   // ======================== FILTER FUNCTIONS
 
   onCountryChange() {
-    // Optionnel: récupérez les départements en fonction du pays sélectionné.
+    // Optionally, fetch departments based on the selected country.
   }
 
   updateMinPrice() {
@@ -275,10 +305,12 @@ export class SearchbarComponent implements OnInit {
       brand: this.selectedBrand || null,
       price: { min: this.minPrice, max: this.maxPrice },
     };
+
     this.appliedFilters = Object.fromEntries(
       Object.entries(filters).filter(([_, value]) => value !== null && value !== '')
     );
   }
+
 
   // ======================== DROPDOWN TOGGLING
 

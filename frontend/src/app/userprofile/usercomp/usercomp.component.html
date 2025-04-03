@@ -4,8 +4,8 @@
     <img class="profile-image" src="rhinoceros.png" alt="Profile Picture" />
     <div class="profile-info">
       <h2 class="username">{{ userInfo?.username }}</h2>
-      <h5 class="email">{{ userInfo?.email }}</h5>
-      <!-- <p class="location">{{ location }}</p> -->
+      <h4 class="email">{{ userInfo?.email }}</h4>
+      <h4 class="locaton">{{ userInfo?.address?.postCode }} {{ userInfo?.address?.city }}, {{ userInfo?.address?.country }}</h4>      <!-- <p class="location">{{ location }}</p> -->
       <div class="profile-actions">
         <button class="edit-profile-btn">Edit Profile</button>
       </div>

@@ -147,16 +147,31 @@ This section explains how to deploy the complete application (frontend, backend,
 projetCapG/
 ├── backend/                # NestJS Application
 ├── frontend/               # Angular Application
-├── couchbase-setup/        # Couchbase initialization scripts
-├── .env.development        # Environment variables for Docker
-├── docker-compose.yml      # Docker Compose configuration
-├── start-docker.cmd        # Launch script for Windows
-└── README.md               # This file
+├── bucketsJSON/            # Couchbase initialization scripts and data
+├── .env.docker            # Environment variables for Docker
+├── docker-compose.yml     # Docker Compose configuration
+├── nginx-proxy.conf       # Nginx reverse proxy configuration
+├── start-docker.cmd       # Launch script for Windows
+└── README.md              # This file
 ```
 
 ## Configuration
 
-All environment variables are defined in the `.env.development` file at the project root. If you want to modify parameters (ports, bucket names, etc.), you can edit this file.
+All environment variables are defined in the `.env.docker` file at the project root. If you want to modify parameters (ports, bucket names, etc.), you can edit this file.
+
+## Docker Architecture
+
+The Docker deployment uses a multi-container architecture:
+
+1. **Couchbase**: Database server
+2. **Backend**: NestJS application running on port 3001
+3. **Frontend**: Angular application served by Nginx on port 80 within the container
+4. **Nginx Proxy**: Reverse proxy that routes requests between the frontend and backend
+
+The communication flow is:
+- Browser → Nginx Proxy (port 8081) → Frontend or Backend
+- Frontend container communicates with Backend through relative URLs (e.g., `/api/...`)
+- Nginx Proxy routes all `/api/` requests to the Backend service
 
 ## Starting the Project with Docker
 
@@ -172,26 +187,92 @@ Run the `start-docker.cmd` script at the project root:
 
 Note the `.\` prefix which is required in PowerShell to run scripts in the current directory.
 
-Or you can start manually by specifying the environment file:
+Or you can start manually with Docker Compose:
 
 ```
-docker-compose --env-file .env.development up -d
+docker-compose up -d
 ```
 
 This command will:
 1. Download the Couchbase image
-2. Build Docker images for the backend, frontend, and initialization scripts
-3. Start all services
-4. Initialize Couchbase with the necessary buckets and indexes
+2. Build Docker images for the backend and frontend
+3. Start all services including the Nginx proxy
+4. Provide instructions to initialize Couchbase
+
+### Rebuilding Specific Services
+
+If you make changes to the code, you can rebuild specific services:
+
+```
+docker-compose build frontend   # Rebuild only the frontend
+docker-compose build backend    # Rebuild only the backend
+```
+
+Then restart the services:
+
+```
+docker-compose up -d
+```
 
 ## Accessing Services
 
 Once the containers are started, you can access the following services:
 
-- **Frontend**: http://localhost:4200
-- **Backend API**: http://localhost:3000/data
+- **Frontend (direct)**: http://localhost:4201
+- **Frontend (via proxy)**: http://localhost:8081 (recommended)
+- **Backend API**: http://localhost:3001
 - **Couchbase Admin Interface**: http://localhost:8091
-  - Default credentials: user1 / password (configured in the .env.development file)
+  - Default credentials: user1 / password (configured in the .env.docker file)
+
+## Couchbase Configuration and Data Import
+
+After starting the containers for the first time, you'll need to configure Couchbase and import data:
+
+1. **Access the Couchbase Administration Interface**:
+   - Open your browser at http://localhost:8091
+   - The Couchbase initialization screen will appear
+
+2. **Configure a New Cluster**:
+   - Follow the setup wizard to create a new cluster
+   - Configure the memory allocation based on your system resources:
+     - For systems with less than 8GB RAM, reduce the default memory allocation for data services
+     - For systems with 8GB+ RAM, you can use the default settings
+     - Note: Systems with less than 8GB RAM may experience performance issues
+   - Accept the default terms and services
+
+3. **Create an Administrator User**:
+   - In the Security tab, create a new user with administrator rights
+   - Use the credentials defined in your `.env.docker` file:
+     - Username: `user1`
+     - Password: `password`
+   - Make sure to select "Full Administrator" role for this user
+   - This step is critical as the backend will use these credentials to connect to Couchbase
+
+4. **Import Data**:
+   - First, install the Python package for Couchbase:
+   ```
+   pip install couchbase
+   ```
+   - Then run the import script to create buckets and populate them with data:
+   ```
+   python bucketsJSON/importBuckets.py
+   ```
+   - This script will create all necessary buckets (BrandsBDD, CategoryBDD, ProductsBDD, UsersBDD) and import sample data
+
+5. **Creating Indexes (if needed)**:
+   - Once buckets are created and data is imported, you may need to create indexes to optimize searches
+   - In the Couchbase Admin interface:
+     - Go to the "Search" tab
+     - Click on "Add Index"
+     - Name your index (e.g., "IndexTest")
+     - Select the "ProductsBDD" bucket as the data source
+     - In the "Type Mapping" options:
+       - Add fields to index one by one: category, FK_Brands, name, status, tags, description
+       - For each field, select the "text" type
+     - In the "Index Settings" options:
+       - Check the options for French language
+       - Enable the first 4 indexing options (default, standard, keyword, simple)
+     - Click "Create Index" to finalize
 
 ## Stopping Containers
 
@@ -215,88 +296,49 @@ docker-compose down -v
 
 ## Troubleshooting
 
-If you encounter issues with Couchbase initialization, you can check the logs:
+If you encounter issues with Docker setup:
 
-```
-docker-compose logs couchbase-setup
-```
-
-For backend or frontend issues:
-
-```
-docker-compose logs backend
-docker-compose logs frontend
-```
-## Environment Configuration
-
-This project uses Docker Compose to deploy multiple services:
-- Angular Frontend (port 4200)
-- Nestjs Backend (port 3000)
-- Couchbase Database (port 8091)
-
-## Manual Couchbase Configuration
-
-The Couchbase database needs to be configured manually. Follow these steps after launching the containers:
-
-1. **Access the Couchbase Administration Interface**:
-   - Open your browser at http://localhost:8091
-   - The Couchbase initialization screen will appear
-
-2. **Configure a New Cluster**:
-   - Cluster name: `cluster1` (or a name of your choice)
-   - Create an administrator account:
-     - Username: `yourUsername`
-     - Password: `yourMDP`
-   - Click "Next"
-
-3. **Create Buckets**:
-   - Once logged into the administration interface, go to the "Buckets" tab
-   - Create the following buckets (for each one, click on "Add Bucket"):
-     - Name: `ProductsBDD`, RAM Quota: 100 MB
-     - Name: `UsersBDD`, RAM Quota: 100 MB
-     - Name: `CategoryBDD`, RAM Quota: 100 MB
-     - Name: `BrandsBDD`, RAM Quota: 100 MB
-
-5. **Create an Administrative User**:
-   - This user will be referenced in your .env file
-   - Go to the "Security" tab, then click "Add User"
-   - Use the following credentials to match the configuration:
-     - Username: `user1`
-     - Password: `password`
-   - Make sure to select Administrative permissions!
-
-6. **Create an Index**:
-   - Before creating the index, you need to add at least one product to ProductsBDD
-   - In the "Documents" tab of ProductsBDD, add a document with this following structure:
-   
-   ```json
-   {
-     "FK_Brands": "brand::0903ec71-6f5f-4623-968e-f0f3dc4035ec",
-     "category": "Electronics",
-     "createdAt": "2025-03-10T13:26:37.801Z",
-     "description": "dfdfsf",
-     "ecoscore": "d",
-     "id": "13f63a7e-44df-4aa9-830b-03d276d2fad8",
-     "image": "",
-     "manufacturing_places": "",
-     "name": "testEelect",
-     "origin": "France",
-     "source": "Internal",
-     "status": "add-product",
-     "tags": [
-       "test",
-       "brand"
-     ],
-     "updatedAt": "2025-03-10T13:26:37.801Z"
-   }
+1. **Check container logs**:
    ```
+   docker logs projetcapg-backend-1
+   docker logs projetcapg-frontend-1
+   docker logs couchbase
+   docker logs projetcapg-nginx-proxy-1
+   ```
+
+2. **Verify Couchbase is properly configured**:
+   - Make sure you've created the admin user with correct permissions
+   - Check that all required buckets were created
+   - Confirm the data import script ran successfully
+
+3. **Frontend/Backend connection issues**:
+   - The frontend container uses environment files optimized for Docker: `environment.docker.ts`
+   - This ensures all API calls use relative paths (`/api/...`) instead of absolute URLs
+   - The Nginx proxy (nginx-proxy.conf) routes these requests to the backend
+
+4. **Rebuild specific services if code changes are not appearing**:
+   ```
+   # Rebuild and restart only the frontend
+   .\rebuild-frontend.cmd
    
-   - Then go to the "Search" tab and select "Quick Index"
-   - Name the index: `IndexTest`
-   - Select keyspace: `ProductsBDD`
-   - In the field selection, choose: category, FK_Brands, name, status, tags, description one after the other
-   - Select type: text
-   - Select the first French and 4 first checkboxes for indexing options
+   # Rebuild and restart only the backend
+   .\rebuild-backend.cmd
+   
+   # Rebuild and restart everything
+   .\rebuild-all.cmd
+   
+   # Or manually:
+   docker-compose down
+   docker-compose build frontend backend
+   .\start-docker.cmd
+   ```
+
+5. **Reset everything and start fresh**:
+   ```
+   docker-compose down -v
+   .\start-docker.cmd
+   ```
+   Remember to reconfigure Couchbase and import data again after resetting.
 
 ## Important Notes About Couchbase Configuration
 

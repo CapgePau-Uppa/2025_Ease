@@ -33,8 +33,8 @@ import { UserRole } from "src/auth/enums/roles.enum";
 // .env
 import * as dotenv from "dotenv";
 dotenv.config();
-// Generate unique ID
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";  // Generate unique ID
+import { AddressDto } from "src/auth/dto/auth.dto"; // Check of the address
 // Definition of expected keys for Buckets and Collections
 type BucketKeys = "productsBucket" | "usersBucket" | "categBucket" | "brandBucket";
 type CollectionKeys = "productsCollection" | "usersCollection" | "categCollection" | "brandCollection";
@@ -697,32 +697,32 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    */
   async updateUserRole(email: string, role: string): Promise<any> {
     try {
-      // Vérifier si l'utilisateur existe avant de mettre à jour
+      // Check if the user exists before updating
       const userExists = await this.getUserByEmail(email);
       if (!userExists) {
         console.warn(`⚠️ No user found with email: ${email}`);
         return null;
       }
 
-      // Utiliser l'API Couchbase directement pour mettre à jour le document
+      // Use the Couchbase API directly to update the document
       const collection = this.getUsersCollection();
       const userId = userExists.id;
 
       try {
-        // Récupérer le document actuel
+        // Retrieve current document
         const getResult = await collection.get(userId);
         const userDoc = getResult.content;
 
-        // Mettre à jour le rôle
+        // Update role
         userDoc.role = role;
         userDoc.updatedAt = new Date().toISOString();
 
-        // Enregistrer le document mis à jour
+        // Save updated document
         await collection.replace(userId, userDoc);
 
         console.log(`✅ Role updated successfully for user ${email}`);
 
-        // Récupérer l'utilisateur mis à jour pour confirmation
+        // Retrieve updated user for confirmation
         return await this.getUserByEmail(email);
       } catch (err) {
         console.error(`❌ Error during Couchbase operation: ${err.message}`);
@@ -755,24 +755,24 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * @brief Adds a new user to the Couchbase database.
-   *
-   * @details This function checks if the user's email already exists in the database. If not, it creates a new user document with the provided username, email, password, and a default role of "User". The document is inserted into the Couchbase database.
-   * It also adds timestamps for `createdAt` and `updatedAt` fields to track when the user was created and last updated.
+   * 
+   * It also adds timestamps for `createdAt` and `updatedAt` fields to track when the user was created 
+   * and last updated.
    *
    * @param username The username of the new user.
    * @param email The email of the new user, used as the unique identifier.
    * @param password The password of the new user, stored as plain text (must be hashed before actual usage).
+   * @param address The address of the user, containing `postCode`, `city`, and `country`.
    * @param role The role of the new user.
    *
    * @returns A Promise that resolves to the result of the insertion query, or null if the user already exists.
    *
    * @throws InternalServerErrorException If there is an error during the insertion process.
    */
-  async addUser(username: string, email: string, password: string, role?: UserRole): Promise<any> {
+  async addUser(username: string, email: string, password: string, address: AddressDto, role?: UserRole): Promise<any> {
     const bucketName = this.usersBucket.name;
     const userId = uuidv4();
-
-    // Directly insert the document with `INSERT ... ON CONFLICT DO NOTHING`
+    
     const query = `
       INSERT INTO \`${bucketName}\`._default._default (KEY, VALUE)
       VALUES ($userId, {
@@ -781,16 +781,30 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         "password": $password,
         "role": $role,
         "createdAt": NOW_STR(),
-        "updatedAt": NOW_STR()
+        "updatedAt": NOW_STR(),
+        "address": {
+          "postCode": $postCode,
+          "city": $city,
+          "country": $country
+        }
       })
       RETURNING *;
     `;
-
-    const result = await this.executeQuery(query, { userId, username, email, password, role: role || UserRole.USER });
-
+  
+    const result = await this.executeQuery(query, { 
+      userId, 
+      username, 
+      email, 
+      password, 
+      role: role || UserRole.USER,
+      postCode: address.postCode, 
+      city: address.city, 
+      country: address.country 
+    });
+  
     return result.length ? result[0] : null; // Returns `null` if already existing
   }
-
+  
   /**
    * @brief Retrieves a user from Couchbase by their email.
    *
@@ -865,7 +879,6 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   // ========================================================================
   // ======================== PRODUCTS FUNCTIONS
   // ========================================================================
-
   /**
    * @brief Adds a new product, handling validation and brand management.
    *

@@ -1,16 +1,13 @@
 #!/bin/bash
 set -e
 
-echo "🔍 Contenu du répertoire /usr/share/nginx/html:"
-ls -la /usr/share/nginx/html/
+# Remplacer les variables d'environnement dans index.html
+echo "Remplacement des variables d'environnement..."
 
-echo "🔄 Remplacer les variables d'environnement dans les fichiers JavaScript..."
-find /usr/share/nginx/html -type f -name "*.js" -exec sed -i "s|http://localhost:3000|${URL_BACKEND:-http://localhost:3000}|g" {} \;
-find /usr/share/nginx/html -type f -name "*.js" -exec sed -i "s|http://localhost:4200|${URL_FRONTEND:-http://localhost:4200}|g" {} \;
+# Copier le fichier d'environnement Docker à la place de l'environnement par défaut
+cp /usr/share/nginx/html/assets/environments/environment.docker.js /usr/share/nginx/html/assets/environments/environment.js
 
-echo "✅ Variables d'environnement remplacées avec succès"
-echo "Frontend URL: ${URL_FRONTEND:-http://localhost:4200}"
-echo "Backend URL: ${URL_BACKEND:-http://localhost:3000/data}"
+echo "Configuration terminée."
 
-echo "🚀 Démarrage de Nginx..."
-exec "$@" 
+# Démarrer Nginx
+exec "$@"

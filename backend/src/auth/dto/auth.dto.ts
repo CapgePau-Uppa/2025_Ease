@@ -6,7 +6,39 @@
  * including registration and login requests.
  */
 
-import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
+import { IsNotEmpty, MinLength, IsEmail, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+/**
+ * @class AddressDto
+ * @brief DTO for user registration.
+ *
+ * This class defines the structure and validation rules for user's address.
+ */
+export class AddressDto {
+  /**
+   * @property postCode
+   * @brief The postal code of the user.
+   * @details Must not be empty.
+   */
+  @IsNotEmpty()
+  postCode: string;
+
+  /**
+   * @property city
+   * @brief The city of the user.
+   * @details Must not be empty.
+   */
+  @IsNotEmpty()
+  city: string;
+
+  /**
+   * @property country
+   * @brief The country of the user.
+   * @details Must not be empty.
+   */
+  @IsNotEmpty()
+  country: string;
+}
 
 /**
  * @class RegisterDto
@@ -40,6 +72,15 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  /**
+   * @property address
+   * @brief The address of the user.
+   * @details Must be a valid address object.
+   */
+  @ValidateNested()
+  @Type(() => AddressDto)
+  address: AddressDto;
 }
 
 /**

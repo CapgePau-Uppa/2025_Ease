@@ -110,7 +110,7 @@ async function bootstrap() {
   console.log('🌍 Configuration CORS permissive pour diagnostic');
 
   app.enableCors({
-    origin: true, // Accepte toutes les origines
+    origin: ['http://localhost:8081', 'http://localhost:4201', 'http://frontend', 'http://localhost:4200', 'http://nginx-proxy'],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
     allowedHeaders: ["Content-Type", "Accept", "Authorization", "X-Requested-With", "Origin"],
@@ -118,12 +118,11 @@ async function bootstrap() {
     maxAge: 3600
   });
 
-  console.log('✅ CORS configuré en mode permissif');
 
   /**
    * Starts the NestJS server on the configured port.
    */
-  const port = process.env.BACKEND_PORT || 3000;
+  const port = process.env.BACKEND_PORT || 3001;
   await app.listen(port, "0.0.0.0");
   logger.log("info", `🚀 Application started at http://localhost:${port}`);
 }
